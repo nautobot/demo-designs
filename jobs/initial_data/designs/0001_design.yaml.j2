@@ -26,7 +26,6 @@ roles:
 location_types:
   - "!create_or_update:name": "Region"
     nestable: true
-  
     children:
       - "!create_or_update:name": "Site"
         content_types:
@@ -70,6 +69,7 @@ location_types:
               "!ref": "lga1"
           - "!create_or_update:name": "US-West-1"
             location_type__name: "Region"
+            description: {{ custom_description }}
             status__name: "Active"
             children:
             - "!create_or_update:name": "LAX11"
@@ -91,8 +91,8 @@ provider_networks:
 circuit_types:
   - "!create_or_update:name": "Ethernet"
 
-{% macro device(device_name, site) -%}
-    - "!create_or_update:name": "{{ device_name }}.{{ site }}"
+{% macro device(index, site) -%}
+    - "!create_or_update:name": "core{{ index }}.{{ site }}"
       location: "!ref:{{ site }}"
       device_type__model: "PTX10016"
       role__name: "Core Router"
@@ -100,18 +100,9 @@ circuit_types:
 {% endmacro %}
 
 devices:
-    # IAD5 Core Router Pair
-    {{ device("core01", "iad5") }}
-    {{ device("core02", "iad5") }}
-
-    # LGA1 Core Router Pair
-    {{ device("core01", "lga1") }}
-    {{ device("core02", "lga1") }}
-
-    # LAX11 Core Router Pair
-    {{ device("core01", "lax11") }}
-    {{ device("core02", "lax11") }}
-
-    # SEA1 Core Router Pair
-    {{ device("core01", "sea1") }}
-    {{ device("core02", "sea1") }}
+    {% for index in range(routers_per_site) %}
+    {{ device(index, "iad5") }}
+    {{ device(index, "lga1") }}
+    {{ device(index, "lax11") }}
+    {{ device(index, "sea1") }}
+    {% endfor %}
