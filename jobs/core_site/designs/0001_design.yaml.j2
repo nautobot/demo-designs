@@ -5,6 +5,10 @@ locations:
     location_type__name: "Site"
     status__name: "Planned"
     "!ref": "site"
+    prefixes:
+      - prefix: "{{ site_prefix }}"
+        status__name: "Active"
+        "!ref": "parent_prefix"
 
 racks:
   - name: "{{ site_name }}-101"
@@ -16,11 +20,6 @@ racks:
     "!ref": "rack2"
     location: "!ref:site"
     status__name: "Planned"
-
-prefixes:
-  - prefix: "{{ site_prefix }}"
-    status__name: "Active"
-    "!ref": "parent_prefix"
 
 {% macro inventory_item(name, part_id, description) -%}
       - name: "{{ name }}"
