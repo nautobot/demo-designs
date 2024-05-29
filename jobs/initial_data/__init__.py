@@ -1,9 +1,8 @@
 """Initial data required for core sites."""
 
-from nautobot.apps.jobs import register_jobs
+from nautobot.apps.jobs import register_jobs, IntegerVar
 
 from nautobot_design_builder.design_job import DesignJob
-from nautobot.extras.jobs import IntegerVar
 
 from .context import InitialDesignContext
 
