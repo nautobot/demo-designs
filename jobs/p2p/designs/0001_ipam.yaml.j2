@@ -12,7 +12,8 @@ tags:
 
 prefixes:
     - "!create_or_update:prefix": "{{ p2p_prefix }}"
-      status__name: "Container"
+      type: "container"
+      status__name: "Active"
 
 vrfs:
   - "!create_or_update:name": "{{ p2p_asn }}:{{ get_customer_id(customer_name, p2p_asn) }}"
