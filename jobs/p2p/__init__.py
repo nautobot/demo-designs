@@ -92,4 +92,5 @@ The outcome of the design contains:
     - A cable connected to both `Interfaces`
 """
 
+name = "Demo Designs"
 register_jobs(P2PDesign)
