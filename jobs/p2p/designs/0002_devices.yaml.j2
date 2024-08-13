@@ -17,13 +17,13 @@
         {% endif %}
         tags:
           - {"!get:name": "VRF Interface"}
-        ip_address_assignments:
-          - ip_address:
-              "!child_prefix:address":
-                parent: "!ref:p2p_prefix"
-                offset: "0.0.0.{{ offset }}/30"
+        ip_addresses:
+          - "!child_prefix:address":
+              action: "create_or_update"
               parent: "!ref:p2p_prefix"
-              status__name: "Reserved"
+              offset: "0.0.0.{{ offset }}/30"
+            parent: "!ref:p2p_prefix"
+            status__name: "Reserved"
 {% endmacro %}
 
 devices:
