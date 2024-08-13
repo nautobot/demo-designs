@@ -66,6 +66,7 @@ class P2PDesign(DesignJob):
         design_mode = DesignModeChoices.DEPLOYMENT
         name = "P2P Connection Design"
         commit_default = False
+        has_sensitive_variables = False
         design_files = [
             "designs/0001_ipam.yaml.j2",
             "designs/0002_devices.yaml.j2",
