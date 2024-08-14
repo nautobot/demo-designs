@@ -1,7 +1,7 @@
 ---
 {% macro device_edit(device, other_device, offset) -%}
   - "!update:name": "{{ device.name }}"
-    local_context_data: {
+    local_config_context_data: {
       "mpls_router": true,
     }
     interfaces:
