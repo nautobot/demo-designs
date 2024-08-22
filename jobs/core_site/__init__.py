@@ -1,9 +1,7 @@
 """Design to create a core backbone site."""
-from nautobot.apps.jobs import register_jobs
+from nautobot.apps.jobs import register_jobs, ObjectVar, StringVar, IPNetworkVar
 
 from nautobot.dcim.models import Location
-
-from nautobot.extras.jobs import ObjectVar, StringVar, IPNetworkVar
 
 from nautobot_design_builder.design_job import DesignJob
 

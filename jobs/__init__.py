@@ -4,10 +4,12 @@ from .core_site import CoreSiteDesign
 from .device_controllers import ControllerDesign
 from .edge_site import EdgeDesign
 from .initial_data import InitialDesign
+from .p2p import P2PDesign
 
 __all__ = [
     "ControllerDesign",
     "CoreSiteDesign",
     "EdgeDesign",
     "InitialDesign",
+    "P2PDesign",
 ]
