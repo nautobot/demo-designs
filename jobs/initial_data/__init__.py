@@ -3,6 +3,7 @@
 from nautobot.apps.jobs import register_jobs, IntegerVar
 
 from nautobot_design_builder.design_job import DesignJob
+from nautobot_design_builder.choices import DesignModeChoices
 
 from .context import InitialDesignContext
 
@@ -16,6 +17,7 @@ class InitialDesign(DesignJob):
     class Meta:
         """Metadata needed to implement the backbone site design."""
 
+        design_mode = DesignModeChoices.DEPLOYMENT
         name = "Initial Data"
         commit_default = False
         design_file = "designs/0001_design.yaml.j2"
