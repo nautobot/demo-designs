@@ -1,0 +1,612 @@
+---
+location_types:
+  - "!create_or_update:name": "External"
+    content_types:
+      - "!get:app_label": "dcim"
+        "!get:model": "controller"
+  - "!create_or_update:name": "Region"
+    nestable: true
+    children:
+      - "!create_or_update:name": "Site"
+        content_types:
+          - "!get:app_label": "circuits"
+            "!get:model": "circuittermination"
+          - "!get:app_label": "dcim"
+            "!get:model": "device"
+          - "!get:app_label": "dcim"
+            "!get:model": "controller"
+          - "!get:app_label": "dcim"
+            "!get:model": "powerpanel"
+          - "!get:app_label": "dcim"
+            "!get:model": "rack"
+          - "!get:app_label": "dcim"
+            "!get:model": "rackgroup"
+          - "!get:app_label": "ipam"
+            "!get:model": "prefix"
+          - "!get:app_label": "ipam"
+            "!get:model": "vlan"
+          - "!get:app_label": "ipam"
+            "!get:model": "vlangroup"
+          - "!get:app_label": "virtualization"
+            "!get:model": "cluster"
+
+locations:
+  - "!create_or_update:name": "Cisco"
+    status__name: "Active"
+    location_type__name: "External"
+  - "!create_or_update:name": "Americas"
+    status__name: "Active"
+    location_type__name: "Region"
+    children:
+    - "!create_or_update:name": "United States"
+      location_type__name: "Region"
+      status__name: "Active"
+      children:
+        - "!create_or_update:name": "ATL01"
+          location_type__name: "Site"
+          status__name: "Active"
+          "!ref": "atl01"
+        - "!create_or_update:name": "DFW01"
+          location_type__name: "Site"
+          status__name: "Active"
+          "!ref": "dfw01"
+
+manufacturers:
+  - "!create_or_update:name": "Cisco"
+  - "!create_or_update:name": "HPE"
+
+roles:
+  - "!create_or_update:name": "wireless"
+    color: "673ab7"
+    content_types:
+      - "!get:app_label": "dcim"
+        "!get:model": "device"
+      - "!get:app_label": "ipam"
+        "!get:model": "vlan"
+  - "!create_or_update:name": "switch"
+    color: "00ffff"
+    content_types:
+      - "!get:app_label": "dcim"
+        "!get:model": "device"
+      - "!get:app_label": "ipam"
+        "!get:model": "vlan"
+  - "!create_or_update:name": "wireless_controller"
+    color: "ff9800"
+    content_types:
+      - "!get:app_label": "dcim"
+        "!get:model": "device"
+
+secrets:
+  - "!create_or_update:name": "Wireless_PSK"
+    provider: "environment-variable"
+    parameters: {'variable': 'PSK'}
+    "!ref": "PSK"
+
+secrets_groups:
+  - "!create_or_update:name": "Wireless Secrets Group"
+    "!ref": "wireless_secrets_group"
+
+secrets_group_associations:
+  - "!create_or_update:secrets_group": "!ref:wireless_secrets_group"
+    "!create_or_update:secret": "!ref:PSK"
+    "!create_or_update:access_type": "Generic"
+    "!create_or_update:secret_type": "key"
+
+external_integrations:
+  - "!create_or_update:name": "Cisco Meraki"
+    remote_url: "https://dashboard.meraki.com/"
+    "!ref": "cisco_meraki"
+
+controllers:
+  - "!create_or_update:name": "Cisco Meraki"
+    status__name: "Active"
+    description: "Meraki Cloud Controller"
+    external_integration: "!ref:cisco_meraki"
+    location__name: "Cisco"
+    capabilities:
+      - "wireless"
+    "!ref": "meraki_controller"
+  - "!create_or_update:name": "ATL01 Aruba Mobility"
+    status__name: "Active"
+    description: "Aruba Mobility Controller"
+    location__name: "ATL01"
+    capabilities:
+      - "wireless"
+    "!ref": "atl01_aruba_mobility"
+  - "!create_or_update:name": "DFW01 Aruba Mobility"
+    status__name: "Active"
+    description: "Aruba Mobility Controller"
+    location__name: "DFW01"
+    capabilities:
+      - "wireless"
+    "!ref": "dfw01_aruba_mobility"
+
+controller_managed_device_groups:
+  - "!create_or_update:name": "ATL01 Meraki Wireless Devices"
+    controller: "!ref:meraki_controller"
+    capabilities:
+      - "wireless"
+    "!ref": "atl01_wireless_device_group"
+  - "!create_or_update:name": "DFW01 Meraki Wireless Devices"
+    controller: "!ref:meraki_controller"
+    capabilities:
+      - "wireless"
+    "!ref": "dfw01_wireless_device_group"
+  - "!create_or_update:name": "ATL01 Managed Switch Devices"
+    controller: "!ref:meraki_controller"
+    "!ref": "atl01_switch_device_group"
+  - "!create_or_update:name": "DFW01 Managed Switch Devices"
+    controller: "!ref:meraki_controller"
+    "!ref": "dfw01_switch_device_group"
+  - "!create_or_update:name": "ATL01 Aruba Mobility Wireless Devices"
+    controller: "!ref:atl01_aruba_mobility"
+    capabilities:
+      - "wireless"
+    "!ref": "atl01_aruba_mobility_wireless_device_group"
+  - "!create_or_update:name": "DFW01 Aruba Mobility Wireless Devices"
+    controller: "!ref:dfw01_aruba_mobility"
+    capabilities:
+      - "wireless"
+    "!ref": "dfw01_aruba_mobility_wireless_device_group"
+
+supported_data_rates:
+  - "!create_or_update:standard": "802.11b"
+    "!create_or_update:rate": "1000"
+    "!ref": "80211b-1000"
+  - "!create_or_update:standard": "802.11g"
+    "!create_or_update:rate": "5000"
+    "!ref": "80211g-5000"
+  - "!create_or_update:standard": "802.11n"
+    "!create_or_update:rate": "10000"
+    "!ref": "80211n-10000"
+  - "!create_or_update:standard": "802.11ac"
+    "!create_or_update:rate": "20000"
+    "!ref": "80211ac-20000"
+  - "!create_or_update:standard": "802.11ax"
+    "!create_or_update:rate": "40000"
+    "!ref": "80211ax-40000"
+
+radio_profiles:
+  - "!create_or_update:name": "802.11b"
+    regulatory_domain: "US"
+    allowed_channels:
+      - "1"
+      - "6"
+      - "11"
+    tx_power_min: 10
+    tx_power_max: 20
+    rx_power_min: -10
+    supported_data_rates:
+      - "!ref:80211b-1000"
+    "!ref": "profile_80211b"
+  - "!create_or_update:name": "802.11g"
+    regulatory_domain: "US"
+    supported_data_rates:
+      - "!ref:80211g-5000"
+    "!ref": "profile_80211g"
+  - "!create_or_update:name": "802.11n"
+    channel_width:
+      - 20
+      - 40
+    regulatory_domain: "US"
+    supported_data_rates:
+      - "!ref:80211n-10000"
+    "!ref": "profile_80211n"
+  - "!create_or_update:name": "802.11ac"
+    channel_width:
+      - 20
+      - 40
+      - 80
+      - 160
+    regulatory_domain: "US"
+    supported_data_rates:
+      - "!ref:80211ac-20000"
+    "!ref": "profile_80211ac"
+  - "!create_or_update:name": "802.11ax"
+    channel_width:
+      - 20
+      - 40
+      - 80
+      - 160
+    regulatory_domain: "US"
+    supported_data_rates:
+      - "!ref:80211ax-40000"
+    "!ref": "profile_80211ax"
+
+wireless_networks:
+  - "!create_or_update:name": "Corporate"
+    description: "Wireless Network 1"
+    ssid: "Corporate"
+    mode: "Fabric"
+    authentication: "WPA3 Enterprise 192Bit"
+    secrets_group: "!ref:wireless_secrets_group"
+    hidden: False
+    enabled: True
+    "!ref": "wireless_network_1"
+  - "!create_or_update:name": "BYOD"
+    description: "Wireless Network 2"
+    ssid: "BYOD"
+    mode: "Fabric"
+    authentication: "WPA3 Personal"
+    secrets_group: "!ref:wireless_secrets_group"
+    hidden: True
+    enabled: False
+    "!ref": "wireless_network_2"
+  - "!create_or_update:name": "Guest"
+    description: "Wireless Network 3"
+    ssid: "Guest"
+    mode: "Local (Flex)"
+    authentication: "Open"
+    hidden: False
+    enabled: True
+    "!ref": "wireless_network_3"
+  - "!create_or_update:name": "IoT"
+    description: "Wireless Network 4"
+    ssid: "IoT"
+    mode: "Bridge"
+    authentication: "WPA2 Personal"
+    hidden: True
+    enabled: False
+    "!ref": "wireless_network_4"
+  - "!create_or_update:name": "Corporate Aruba"
+    description: "Wireless Network 5"
+    ssid: "Corporate"
+    mode: "Central"
+    authentication: "WPA3 Enterprise"
+    hidden: False
+    enabled: True
+    "!ref": "wireless_network_5"
+  - "!create_or_update:name": "BYOD Aruba"
+    description: "Wireless Network 6"
+    ssid: "BYOD"
+    mode: "Central"
+    authentication: "WPA3 Personal"
+    hidden: True
+    enabled: False
+    "!ref": "wireless_network_6"
+
+namespaces:
+  - "!create_or_update:name": "Meraki Wireless"
+  - "!create_or_update:name": "Aruba Wireless"
+
+prefixes:
+  - "!create_or_update:prefix": "10.0.0.0/8"
+    "!create_or_update:namespace__name": "Meraki Wireless"
+    type: "container"
+    status__name:  "Active"
+  - "!create_or_update:prefix": "10.0.10.0/24"
+    "!create_or_update:namespace__name": "Meraki Wireless"
+    type: network
+    status__name: "Active"
+    "!ref": "prefix_1"
+  - "!create_or_update:prefix": "10.0.20.0/24"
+    "!create_or_update:namespace__name": "Meraki Wireless"
+    type: network
+    status__name: "Active"
+    "!ref": "prefix_2"
+  - "!create_or_update:prefix": "10.0.30.0/24"
+    "!create_or_update:namespace__name": "Meraki Wireless"
+    type: network
+    status__name: "Active"
+    "!ref": "prefix_3"
+  - "!create_or_update:prefix": "10.0.40.0/24"
+    "!create_or_update:namespace__name": "Meraki Wireless"
+    type: network
+    status__name: "Active"
+    "!ref": "prefix_4"
+  - "!create_or_update:prefix": "10.0.0.0/8"
+    "!create_or_update:namespace__name": "Aruba Wireless"
+    type: "container"
+    status__name:  "Active"
+  - "!create_or_update:prefix": "10.0.10.0/24"
+    "!create_or_update:namespace__name": "Aruba Wireless"
+    type: network
+    status__name: "Active"
+    "!ref": "prefix_5"
+  - "!create_or_update:prefix": "10.0.20.0/24"
+    "!create_or_update:namespace__name": "Aruba Wireless"
+    type: network
+    status__name: "Active"
+    "!ref": "prefix_6"
+  - "!create_or_update:prefix": "10.1.10.0/24"
+    "!create_or_update:namespace__name": "Aruba Wireless"
+    type: network
+    status__name: "Active"
+    "!ref": "prefix_7"
+  - "!create_or_update:prefix": "10.1.20.0/24"
+    "!create_or_update:namespace__name": "Aruba Wireless"
+    type: network
+    status__name: "Active"
+    "!ref": "prefix_8"
+
+vlan_groups:
+  - "!create_or_update:name": "Meraki Wireless VLANs"
+    "!ref": "wireless_vlans"
+  - "!create_or_update:name": "ATL01 Wireless VLANs"
+    location: "!ref:atl01"
+    "!ref": "atl01_wireless_vlans"
+  - "!create_or_update:name": "DFW01 Wireless VLANs"
+    location: "!ref:dfw01"
+    "!ref": "dfw01_wireless_vlans"
+
+vlans:
+  - "!create_or_update:vid": "10"
+    "!create_or_update:vlan_group": "!ref:wireless_vlans"
+    name: "CORP VLAN"
+    locations:
+      - "!ref:atl01"
+      - "!ref:dfw01"
+    status__name: "Active"
+    role__name: "wireless"
+    prefixes:
+      - "!ref:prefix_1"
+    "!ref": "wireless_vlan_1"
+  - "!create_or_update:vid": "20"
+    "!create_or_update:vlan_group": "!ref:wireless_vlans"
+    name: "BYOD VLAN"
+    locations:
+      - "!ref:atl01"
+      - "!ref:dfw01"
+    status__name: "Active"
+    role__name: "wireless"
+    prefixes:
+      - "!ref:prefix_2"
+    "!ref": "wireless_vlan_2"
+  - "!create_or_update:vid": "30"
+    "!create_or_update:vlan_group": "!ref:wireless_vlans"
+    name: "GUEST VLAN"
+    locations:
+      - "!ref:atl01"
+      - "!ref:dfw01"
+    status__name: "Active"
+    role__name: "wireless"
+    prefixes:
+      - "!ref:prefix_3"
+    "!ref": "wireless_vlan_3"
+  - "!create_or_update:vid": "40"
+    "!create_or_update:vlan_group": "!ref:wireless_vlans"
+    name: "IoT VLAN"
+    locations:
+      - "!ref:atl01"
+      - "!ref:dfw01"
+    status__name: "Active"
+    role__name: "wireless"
+    prefixes:
+      - "!ref:prefix_4"
+    "!ref": "wireless_vlan_4"
+  - "!create_or_update:vid": "10"
+    "!create_or_update:vlan_group": "!ref:atl01_wireless_vlans"
+    name: "CORP VLAN"
+    locations:
+      - "!ref:atl01"
+    status__name: "Active"
+    role__name: "wireless"
+    prefixes:
+      - "!ref:prefix_5"
+    "!ref": "wireless_vlan_5"
+  - "!create_or_update:vid": "20"
+    "!create_or_update:vlan_group": "!ref:atl01_wireless_vlans"
+    name: "BYOD VLAN"
+    locations:
+      - "!ref:atl01"
+    status__name: "Active"
+    role__name: "wireless"
+    prefixes:
+      - "!ref:prefix_6"
+    "!ref": "wireless_vlan_6"
+  - "!create_or_update:vid": "10"
+    "!create_or_update:vlan_group": "!ref:dfw01_wireless_vlans"
+    name: "CORP VLAN"
+    locations:
+      - "!ref:dfw01"
+    status__name: "Active"
+    role__name: "wireless"
+    prefixes:
+      - "!ref:prefix_7"
+    "!ref": "wireless_vlan_7"
+  - "!create_or_update:vid": "20"
+    "!create_or_update:vlan_group": "!ref:dfw01_wireless_vlans"
+    name: "BYOD VLAN"
+    locations:
+      - "!ref:dfw01"
+    status__name: "Active"
+    role__name: "wireless"
+    prefixes:
+      - "!ref:prefix_8"
+    "!ref": "wireless_vlan_8"
+
+controller_managed_device_group_wireless_network_assignments:
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_1"
+    vlan: "!ref:wireless_vlan_1"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_2"
+    vlan: "!ref:wireless_vlan_2"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_3"
+    vlan: "!ref:wireless_vlan_3"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_4"
+    vlan: "!ref:wireless_vlan_4"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_1"
+    vlan: "!ref:wireless_vlan_1"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_2"
+    vlan: "!ref:wireless_vlan_2"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_4"
+    vlan: "!ref:wireless_vlan_4"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_aruba_mobility_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_5"
+    vlan: "!ref:wireless_vlan_5"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_aruba_mobility_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_6"
+    vlan: "!ref:wireless_vlan_6"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_aruba_mobility_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_5"
+    vlan: "!ref:wireless_vlan_7"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_aruba_mobility_wireless_device_group"
+    "!create_or_update:wireless_network": "!ref:wireless_network_6"
+    vlan: "!ref:wireless_vlan_8"
+
+controller_managed_device_group_radio_profile_assignments:
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211b"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211g"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211n"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211ac"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211ax"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_aruba_mobility_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211ac"
+  - "!create_or_update:controller_managed_device_group": "!ref:dfw01_aruba_mobility_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211ax"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_aruba_mobility_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211ac"
+  - "!create_or_update:controller_managed_device_group": "!ref:atl01_aruba_mobility_wireless_device_group"
+    "!create_or_update:radio_profile": "!ref:profile_80211ax"
+
+device_families:
+  - "!create_or_update:name": "Meraki"
+  - "!create_or_update:name": "Aruba"
+
+device_types:
+  - "!create_or_update:model": "Meraki MR42"
+    manufacturer__name: "Cisco"
+    device_family__name: "Meraki"
+    is_full_depth: False
+    part_number: "MR42"
+    "!ref": "mr42"
+  - "!create_or_update:model": "Meraki MR52"
+    manufacturer__name: "Cisco"
+    device_family__name: "Meraki"
+    part_number: "MR52"
+    is_full_depth: False
+    "!ref": "mr52"
+  - "!create_or_update:model": "Meraki MS120-8FP"
+    manufacturer__name: "Cisco"
+    device_family__name: "Meraki"
+    part_number: "MS120-8FP"
+    is_full_depth: False
+    "!ref": "ms120-8fp"
+  - "!create_or_update:model": "Aruba 7205"
+    manufacturer__name: "HPE"
+    device_family__name: "Aruba"
+    part_number: "JW736A"
+    is_full_depth: False
+    "!ref": "hpe-aruba-7205"
+  - "!create_or_update:model": "Aruba AP-679"
+    manufacturer__name: "HPE"
+    device_family__name: "Aruba"
+    part_number: "AP-679"
+    is_full_depth: False
+    "!ref": "hpe-aruba-ap-679"
+
+interface_templates:
+  - "!create_or_update:name": "Eth0"
+    "!create_or_update:device_type": "!ref:mr42"
+    type: "1000base-t"
+  - "!create_or_update:name": "Eth0"
+    "!create_or_update:device_type": "!ref:mr52"
+    type: "1000base-t"
+  - "!create_or_update:name": "Eth1"
+    "!create_or_update:device_type": "!ref:mr52"
+    type: "1000base-t"
+  {% for i in range(1,9) %}
+  - "!create_or_update:name": "Port {{ i }}"
+    "!create_or_update:device_type": "!ref:ms120-8fp"
+    type: "1000base-t"
+  {% endfor %}
+  {% for i in range(9,11) %}
+  - "!create_or_update:name": "Port {{ i }}"
+    "!create_or_update:device_type": "!ref:ms120-8fp"
+    type: "1000base-x-sfp"
+  {% endfor %}
+  - "!create_or_update:name": "mgmt"
+    "!create_or_update:device_type": "!ref:hpe-aruba-7205"
+    type: "1000base-t"
+    mgmt_only: True
+  {% for i in range(4) %}
+  - "!create_or_update:name": "gigabitethernet 0/0/{{ i }}"
+    "!create_or_update:device_type": "!ref:hpe-aruba-7205"
+    type: "1000base-t"
+  {% endfor %}
+  {% for i in range(4,6) %}
+  - "!create_or_update:name": "gigabitethernet 0/0/{{ i }}"
+    "!create_or_update:device_type": "!ref:hpe-aruba-7205"
+    type: "10gbase-x-sfpp"
+  {% endfor %}
+  - "!create_or_update:name": "E0"
+    "!create_or_update:device_type": "!ref:hpe-aruba-ap-679"
+    type: "2.5gbase-t"
+  - "!create_or_update:name": "E1"
+    "!create_or_update:device_type": "!ref:hpe-aruba-ap-679"
+    type: "10gbase-x-sfpp"
+
+devices:
+  - "!create_or_update:name": "atl01-arubamobility-01"
+    location: "!ref:atl01"
+    device_type: "!ref:hpe-aruba-7205"
+    role__name: "wireless_controller"
+    status__name: "Active"
+    controllers:
+      - "!ref:atl01_aruba_mobility"
+  - "!create_or_update:name": "dfw01-arubamobility-01"
+    location: "!ref:dfw01"
+    device_type: "!ref:hpe-aruba-7205"
+    role__name: "wireless_controller"
+    status__name: "Active"
+    controllers:
+      - "!ref:dfw01_aruba_mobility"
+  - "!create_or_update:name": "atl01-wireless-01"
+    location: "!ref:atl01"
+    device_type: "!ref:mr42"
+    role__name: "wireless"
+    status__name: "Active"
+    controller_managed_device_group: "!ref:atl01_wireless_device_group"
+  - "!create_or_update:name": "atl01-wireless-02"
+    location: "!ref:atl01"
+    device_type: "!ref:mr52"
+    role__name: "wireless"
+    status__name: "Active"
+    controller_managed_device_group: "!ref:atl01_wireless_device_group"
+  - "!create_or_update:name": "atl01-wireless-03"
+    location: "!ref:atl01"
+    device_type: "!ref:hpe-aruba-ap-679"
+    role__name: "wireless"
+    status__name: "Active"
+    controller_managed_device_group: "!ref:atl01_aruba_mobility_wireless_device_group"
+  - "!create_or_update:name": "dfw01-wireless-01"
+    location: "!ref:dfw01"
+    device_type: "!ref:mr42"
+    role__name: "wireless"
+    status__name: "Active"
+    controller_managed_device_group: "!ref:dfw01_wireless_device_group"
+  - "!create_or_update:name": "dfw01-wireless-02"
+    location: "!ref:dfw01"
+    device_type: "!ref:mr52"
+    role__name: "wireless"
+    status__name: "Active"
+    controller_managed_device_group: "!ref:dfw01_wireless_device_group"
+  - "!create_or_update:name": "dfw01-wireless-03"
+    location: "!ref:dfw01"
+    device_type: "!ref:hpe-aruba-ap-679"
+    role__name: "wireless"
+    status__name: "Active"
+    controller_managed_device_group: "!ref:dfw01_aruba_mobility_wireless_device_group"
+  - "!create_or_update:name": "atl01-switch-01"
+    location: "!ref:atl01"
+    device_type: "!ref:ms120-8fp"
+    role__name: "switch"
+    status__name: "Active"
+    controller_managed_device_group: "!ref:atl01_switch_device_group"
+  - "!create_or_update:name": "dfw01-switch-01"
+    location: "!ref:dfw01"
+    device_type: "!ref:ms120-8fp"
+    role__name: "switch"
+    status__name: "Active"
+    controller_managed_device_group: "!ref:dfw01_switch_device_group"
