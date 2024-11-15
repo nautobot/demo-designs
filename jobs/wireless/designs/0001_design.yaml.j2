@@ -9,26 +9,16 @@ location_types:
     children:
       - "!create_or_update:name": "Site"
         content_types:
-          - "!get:app_label": "circuits"
-            "!get:model": "circuittermination"
           - "!get:app_label": "dcim"
             "!get:model": "device"
           - "!get:app_label": "dcim"
             "!get:model": "controller"
-          - "!get:app_label": "dcim"
-            "!get:model": "powerpanel"
-          - "!get:app_label": "dcim"
-            "!get:model": "rack"
-          - "!get:app_label": "dcim"
-            "!get:model": "rackgroup"
           - "!get:app_label": "ipam"
             "!get:model": "prefix"
           - "!get:app_label": "ipam"
             "!get:model": "vlan"
           - "!get:app_label": "ipam"
             "!get:model": "vlangroup"
-          - "!get:app_label": "virtualization"
-            "!get:model": "cluster"
 
 locations:
   - "!create_or_update:name": "Cisco"
@@ -169,10 +159,10 @@ supported_data_rates:
 radio_profiles:
   - "!create_or_update:name": "802.11b"
     regulatory_domain: "US"
-    allowed_channels:
-      - "1"
-      - "6"
-      - "11"
+    allowed_channel_list:
+      - 1
+      - 6
+      - 11
     tx_power_min: 10
     tx_power_max: 20
     rx_power_min: -10
