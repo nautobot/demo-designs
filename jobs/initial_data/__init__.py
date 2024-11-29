@@ -1,5 +1,5 @@
 """Initial data required for core sites."""
-
+import os
 from nautobot.apps.jobs import register_jobs, IntegerVar
 
 from nautobot_design_builder.design_job import DesignJob
@@ -7,6 +7,9 @@ from nautobot_design_builder.choices import DesignModeChoices
 
 from .context import InitialDesignContext
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(current_dir, "README.md"), "r") as docs:
+    docs_data = docs.read()
 
 class InitialDesign(DesignJob):
     """Initialize the database with default values needed by the core site designs."""
@@ -24,14 +27,7 @@ class InitialDesign(DesignJob):
         context_class = InitialDesignContext
         version = "1.0.0"
         description = "Establish the devices and site information for four sites: IAD5, LGA1, LAX11, SEA11."
-        docs = """This design creates the following objects in the source of truth to establish the initia network environment in  four sites: IAD5, LGA1, LAX11, SEA11.
-
-These sites belong to the America region (and different subregions), and use Juniper PTX10016 devices.
-
-The user input data is:
-    - Number of routers per site (integer)
-    - The description for us-west-1 region (string)
-"""
+        docs = docs_data
 
 
 name = "Demo Designs"
