@@ -90,12 +90,18 @@ provider_networks:
 circuit_types:
   - "!create_or_update:name": "Ethernet"
 
+platforms:
+  - "!create_or_update:name": "Juniper Junos"
+    "manufacturer__name": "Juniper"
+    "!ref": "junos_platform"
+
 {% macro device(index, site) -%}
     - "!create_or_update:name": "core{{ index }}.{{ site }}"
       location: "!ref:{{ site }}"
       device_type__model: "PTX10016"
       role__name: "Core Router"
       status__name: "Planned"
+      platform: "!ref:junos_platform"
 {% endmacro %}
 
 devices:
