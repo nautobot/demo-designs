@@ -3,6 +3,14 @@ manufacturers:
   - "!create_or_update:name": "Juniper"
   - "!create_or_update:name": "Cisco"
 
+platforms:
+  - "!create_or_update:name": "Juniper Junos"
+    "manufacturer__name": "Juniper"
+    "!ref": "junos_platform"
+  - "!create_or_update:name": "Cisco IOS"
+    "manufacturer__name": "Cisco"
+    "!ref": "cisco_ios_platform"
+
 device_types:
   - "!create_or_update:model": "PTX10016"
     manufacturer__name: "Juniper"
@@ -90,10 +98,6 @@ provider_networks:
 circuit_types:
   - "!create_or_update:name": "Ethernet"
 
-platforms:
-  - "!create_or_update:name": "Juniper Junos"
-    "manufacturer__name": "Juniper"
-    "!ref": "junos_platform"
 
 {% macro device(index, site) -%}
     - "!create_or_update:name": "core{{ index }}.{{ site }}"
