@@ -12,6 +12,7 @@ tags:
 
 prefixes:
     - "!create_or_update:prefix": "{{ p2p_prefix }}"
+      length: {{ p2p_prefix.split("/")[-1] | int }}
       type: "container"
       status__name: "Active"
 
