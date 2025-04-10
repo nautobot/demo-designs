@@ -20,7 +20,7 @@ class P2PContext(Context):
 
     def validate_same_location(self):
         if self.device_a.location != self.device_b.location:
-            raise ValidationError({"device_a": "Both routers should be the on the same location."})
+            raise ValidationError({"device_a": "Both routers should be on the same location."})
 
     def get_customer_id(self, customer_name, p2p_asn):
         try:
