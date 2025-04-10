@@ -18,9 +18,9 @@ class P2PContext(Context):
     def __hash__(self):
         return hash((self.device_a.name, self.device_b.name, self.customer_name))
 
-    def validate_unique_devices(self):
-        if self.device_a == self.device_b:
-            raise ValidationError({"device_a": "Both routers can't be the same."})
+    def validate_same_location(self):
+        if self.device_a.location != self.device_b.location:
+            raise ValidationError({"device_a": "Both routers should be the on the same location."})
 
     def get_customer_id(self, customer_name, p2p_asn):
         try:

@@ -52,12 +52,18 @@ class P2PDesign(DesignJob):
         label="Device A",
         description="Device A for P2P connection",
         model=Device,
+        query_params={
+            "id__n": ["$device_b"]
+        },
     )
 
     device_b = ObjectVar(
         label="Device B",
         description="Device B for P2P connection",
         model=Device,
+        query_params={
+            "id__n": ["$device_a"]
+        },
     )
 
     class Meta:
