@@ -15,10 +15,14 @@ racks:
     u_height: 42
     type: ""
 
+cluster_types:
+  - "!create_or_update:name": "Generic"
+    "!ref": "cluster_type"
+
 clusters:
   - name: "{{ site_name }}-cluster"
     location__name: "!ref:my_location"
-    cluster_type__name: "Generic"
+    cluster_type: "!ref:cluster_type"
     "!ref": "mycluster"
 
 virtual_machines:
