@@ -14,16 +14,21 @@ racks:
     status__name: "Available"
     u_height: 42
     type: ""
+    
+cluster_types:
+  - "!create_or_update:name": "Generic"
+    "!ref": "cluster_type"
 
 clusters:
   - name: "{{ site_name }}-cluster"
-    location__name: "{{ site_name }}"
-    cluster_type__name: "Generic"
+    location__name: "!ref:my_location"
+    cluster_type: "!ref:cluster_type"
+    "!ref": "mycluster"
 
 virtual_machines:
   - name: "{{ site_name }}-app-vm0"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -34,7 +39,7 @@ virtual_machines:
 
   - name: "{{ site_name }}-app-vm1"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -45,7 +50,7 @@ virtual_machines:
 
   - name: "{{ site_name }}-app-vm2"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192

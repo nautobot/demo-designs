@@ -14,15 +14,20 @@ racks:
     u_height: 42
     type: ""
 
+cluster_types:
+  - "!create_or_update:name": "Generic"
+    "!ref": "cluster_type"
+
 clusters:
   - name: "{{ site_name }}-cluster"
-    location__name: "{{ site_name }}"
-    cluster_type__name: "Generic"
+    location__name: "!ref:my_location"
+    cluster_type: "!ref:cluster_type"
+    "!ref": "mycluster"
 
 virtual_machines:
   - name: "{{ site_name }}-app-vm0"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: {{ memory_per_vm|int * 1024 }}
@@ -32,7 +37,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm1"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -42,7 +47,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm2"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -52,7 +57,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm3"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -62,7 +67,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm4"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -72,7 +77,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm5"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -82,7 +87,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm6"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -92,7 +97,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm7"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -102,7 +107,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm8"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -112,7 +117,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm9"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -122,7 +127,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm10"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -132,7 +137,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm11"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -142,7 +147,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm12"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -152,7 +157,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm13"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -162,7 +167,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm14"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -172,7 +177,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm15"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -182,7 +187,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm16"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -192,7 +197,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm17"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -202,7 +207,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm18"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -212,7 +217,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm19"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -222,7 +227,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm20"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -232,7 +237,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm21"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -242,7 +247,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm22"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -252,7 +257,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm23"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -262,7 +267,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm24"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -272,7 +277,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm25"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -282,7 +287,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm26"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -292,7 +297,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm27"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -302,7 +307,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm28"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
@@ -312,7 +317,7 @@ virtual_machines:
         status__name: "Active"
   - name: "{{ site_name }}-app-vm29"
     status__name: "Active"
-    cluster__name: "{{ site_name }}-cluster"
+    cluster: "!ref:mycluster"
     tenant__name: "Finance Team"
     vcpus: 4
     memory: 8192
