@@ -18,6 +18,18 @@ class WirelessDesign(DesignJob):
         design_file = "designs/0001_design.yaml.j2"
         context_class = WirelessDesignContext
         has_sensitive_variables = False
+        version = "1.0.0"
+        docs = """
+        # Wireless Data
+
+        This job will create initial data required for wireless designs.
+
+        ## Requirements
+
+        - Nautobot Design Builder must be installed and configured.
+        - The design file **must** be present in the specified path.
+        - Nautobot 2.4.0 or higher.
+        """
 
 name = "Nautobot Demo Designs"
 register_jobs(WirelessDesign)
