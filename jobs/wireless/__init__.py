@@ -1,6 +1,7 @@
 """Initial data required for controllers."""
 from nautobot.apps.jobs import register_jobs
 
+from nautobot_design_builder.choices import DesignModeChoices
 from nautobot_design_builder.design_job import DesignJob
 
 from .context import WirelessDesignContext
@@ -19,6 +20,7 @@ class WirelessDesign(DesignJob):
         context_class = WirelessDesignContext
         has_sensitive_variables = False
         version = "1.0.0"
+        design_mode = DesignModeChoices.DEPLOYMENT
         docs = """
         # Wireless Data
 
