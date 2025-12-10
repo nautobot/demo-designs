@@ -1,9 +1,7 @@
 from nautobot.dcim.models import Location
-
-from netaddr import IPNetwork
-
-from nautobot_design_builder.errors import DesignValidationError
 from nautobot_design_builder.context import Context, context_file
+from nautobot_design_builder.errors import DesignValidationError
+from netaddr import IPNetwork
 
 
 @context_file("context.yaml")

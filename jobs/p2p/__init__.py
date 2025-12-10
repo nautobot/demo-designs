@@ -1,13 +1,12 @@
 """Design to create a P2P connection."""
 
+from nautobot.apps.jobs import ObjectVar, StringVar, register_jobs
 from nautobot.dcim.models import Device, Interface
-from nautobot.apps.jobs import register_jobs, ObjectVar, StringVar
-
 from nautobot_design_builder.choices import DesignModeChoices
-from nautobot_design_builder.design_job import DesignJob
-from nautobot_design_builder.design import ModelInstance
-from nautobot_design_builder.ext import AttributeExtension
 from nautobot_design_builder.contrib import ext
+from nautobot_design_builder.design import ModelInstance
+from nautobot_design_builder.design_job import DesignJob
+from nautobot_design_builder.ext import AttributeExtension
 
 from .context import P2PContext
 
@@ -52,18 +51,14 @@ class P2PDesign(DesignJob):
         label="Device A",
         description="Device A for P2P connection",
         model=Device,
-        query_params={
-            "id__n": ["$device_b"]
-        },
+        query_params={"id__n": ["$device_b"]},
     )
 
     device_b = ObjectVar(
         label="Device B",
         description="Device B for P2P connection",
         model=Device,
-        query_params={
-            "id__n": ["$device_a"]
-        },
+        query_params={"id__n": ["$device_a"]},
     )
 
     class Meta:
@@ -71,7 +66,7 @@ class P2PDesign(DesignJob):
 
         design_mode = DesignModeChoices.DEPLOYMENT
         name = "P2P Connection Design"
-        commit_default = False
+        dryrun_default = True
         has_sensitive_variables = False
         design_files = [
             "designs/0001_ipam.yaml.j2",
@@ -98,6 +93,7 @@ The outcome of the design contains:
     - A new `Interface` in each one of the Devices with a corresponding `IPAddress` from the previous `Prefix`
     - A cable connected to both `Interfaces`
 """
+
 
 name = "Demo Designs"
 register_jobs(P2PDesign)
