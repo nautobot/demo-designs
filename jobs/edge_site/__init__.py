@@ -1,8 +1,7 @@
 """Basic design demonstrates the capabilities of the Design Builder."""
-from nautobot.apps.jobs import register_jobs, StringVar, IPNetworkVar, ObjectVar
 
+from nautobot.apps.jobs import IPNetworkVar, ObjectVar, StringVar, register_jobs
 from nautobot.dcim.models import Location
-
 from nautobot_design_builder.design_job import DesignJob
 
 from .context import EdgeDesignContext
@@ -25,10 +24,11 @@ class EdgeDesign(DesignJob):
         """Metadata describing this design job."""
 
         name = "Edge Design"
-        commit_default = False
+        dryrun_default = True
         design_file = "designs/0001_design.yaml.j2"
         context_class = EdgeDesignContext
         nautobot_version = ">=2"
+
 
 name = "Demo Designs"
 register_jobs(EdgeDesign)

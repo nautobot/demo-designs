@@ -1,8 +1,7 @@
 """Design to create a core backbone site."""
-from nautobot.apps.jobs import register_jobs, ObjectVar, StringVar, IPNetworkVar
 
+from nautobot.apps.jobs import IPNetworkVar, ObjectVar, StringVar, register_jobs
 from nautobot.dcim.models import Location
-
 from nautobot_design_builder.design_job import DesignJob
 
 from .context import CoreSiteContext
@@ -26,10 +25,11 @@ class CoreSiteDesign(DesignJob):
         """Metadata needed to implement the backbone site design."""
 
         name = "Backbone Site Design"
-        commit_default = False
+        dryrun_default = True
         design_file = "designs/0001_design.yaml.j2"
         context_class = CoreSiteContext
         nautobot_version = ">=2"
+
 
 name = "Demo Designs"
 register_jobs(CoreSiteDesign)
