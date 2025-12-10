@@ -9,9 +9,6 @@ from .context import InitialDesignContext
 
 class InitialDesign(DesignJob):
     """Initialize the database with default values needed by the core site designs."""
-    has_sensitive_variables = False
-
-    has_sensitive_variables = False
     routers_per_site = IntegerVar(min_value=1, max_value=6, default=2)
 
     class Meta:
@@ -22,6 +19,7 @@ class InitialDesign(DesignJob):
         design_file = "designs/0001_design.yaml.j2"
         context_class = InitialDesignContext
         version = "1.0.0"
+        has_sensitive_variables = False
         description = "Establish the devices and site information for four sites: IAD5, LGA1, LAX11, SEA11."
         docs = """This design creates the following objects in the source of truth to establish the initia network environment in  four sites: IAD5, LGA1, LAX11, SEA11.
 
