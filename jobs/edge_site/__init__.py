@@ -18,13 +18,13 @@ class EdgeDesign(DesignJob):
 
     site_name = StringVar(label="Site Name", regex=r"\w{3}\d+")
     site_prefix = IPNetworkVar(label="Site Prefix")
-    has_sensitive_variables = False
 
     class Meta:
         """Metadata describing this design job."""
 
         name = "Edge Design"
         dryrun_default = True
+        has_sensitive_variables = False
         design_file = "designs/0001_design.yaml.j2"
         context_class = EdgeDesignContext
         nautobot_version = ">=2"

@@ -19,13 +19,13 @@ class CoreSiteDesign(DesignJob):
     site_name = StringVar(regex=r"\w{3}\d+")
 
     site_prefix = IPNetworkVar(min_prefix_length=16, max_prefix_length=22)
-    has_sensitive_variables = False
 
     class Meta:
         """Metadata needed to implement the backbone site design."""
 
         name = "Backbone Site Design"
         dryrun_default = True
+        has_sensitive_variables = False
         design_file = "designs/0001_design.yaml.j2"
         context_class = CoreSiteContext
         nautobot_version = ">=2"

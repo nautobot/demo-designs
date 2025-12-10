@@ -22,12 +22,24 @@ class VMXXLDesign(DesignJob):
         regex=r"\w{3}\d+",
         description="Unique name for the site.",
     )
-    cluster_name = StringVar(label="Cluster Name", default="Cluster-01")
-    tenant = ObjectVar(
-        label="Tenant", model=Tenant, required=False, description="Optional tenant to assign resources to."
+    cluster_name = StringVar(
+        label="Cluster Name",
+        default="Cluster-01",
     )
-    rack_name = StringVar(label="Rack Name", default="Rack-01")
-    vm_quantity = IntegerVar(label="Number of VMs", default=30)
+    tenant = ObjectVar(
+        label="Tenant",
+        model=Tenant,
+        required=False,
+        description="Optional tenant to assign resources to.",
+    )
+    rack_name = StringVar(
+        label="Rack Name",
+        default="Rack-01",
+    )
+    vm_quantity = IntegerVar(
+        label="Number of VMs",
+        default=30,
+    )
     memory_per_vm = ChoiceVar(
         label="Memory per VM (GB)",
         choices=[
@@ -40,7 +52,6 @@ class VMXXLDesign(DesignJob):
         default="8",
         description="Amount of memory (in GB) to assign to each VM.",
     )
-    has_sensitive_variables = False
 
     class Meta:
         """Metadata describing this XXL infra design job."""
@@ -48,6 +59,7 @@ class VMXXLDesign(DesignJob):
         design_mode = DesignModeChoices.DEPLOYMENT
         name = "VM XXL Infra Design"
         dryrun_default = True
+        has_sensitive_variables = False
         design_file = "designs/0001_design.yaml.j2"
         context_class = NonNetworkDesignContext
         nautobot_version = ">=2"
