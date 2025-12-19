@@ -1,0 +1,215 @@
+---
+tenants:
+  - "!create_or_update:name": "NTC"
+
+providers:
+  - "!create_or_update:name": "NTC"
+    provider_networks:
+      - "!create_or_update:name": "NTC-WAN"
+
+location_types:
+  - "!create_or_update:name": "Site"
+    children:
+      - "!create_or_update:name": "Pod"
+        content_types:
+          - { "!get:model": "device" }
+          - { "!get:model": "rack" }
+          - { "!get:model": "prefix" }
+          - { "!get:model": "vlan" }
+          - { "!get:model": "vlangroup" }
+          - { "!get:model": "circuittermination" }
+          - { "!get:model": "cluster" }
+
+locations:
+  - "!create_or_update:name": "Athens"
+    location_type__name: "Site"
+    status__name: "Active"
+
+manufacturers:
+  - "!create_or_update:name": "Arista"
+  - "!create_or_update:name": "HP"
+  - "!create_or_update:name": "F5"
+
+platforms:
+  - "!create_or_update:name": "F5 BIG-IP"
+    manufacturer__name: "F5"
+  - "!create_or_update:name": "Arista EOS"
+    manufacturer__name: "Arista"
+    "network_driver": "arista_eos"
+  - "!create_or_update:name": "Linux"
+
+software_versions:
+  - "!create_or_update:version": "4.32.1F"
+    platform__name: "Arista EOS"
+    status__name: "Active"
+
+device_types:
+  - "!create_or_update:model": "Dummy"
+    manufacturer__name: "Arista"
+  - "!create_or_update:model": "F5 BIG-IP"
+    manufacturer__name: "F5"
+  - "!create_or_update:model": "HP Dummy Server"
+    manufacturer__name: "HP"
+  - "!create_or_update:model": "HP Storage"
+    manufacturer__name: "HP"
+    u_height: 8
+
+roles:
+  - "!create_or_update:name": "Load Balancer"
+    color: "ff5722"
+    content_types:
+      - { "!get:model": "device" }
+  - "!create_or_update:name": "Storage Array"
+    color: "90708b"
+    content_types:
+      - { "!get:model": "device" }
+  - "!create_or_update:name": "Server"
+    color: "ff9800"
+    content_types:
+      - { "!get:model": "device" }
+  - "!create_or_update:name": "Router"
+    color: "607d8b"
+    content_types:
+      - { "!get:model": "device" }
+  - "!create_or_update:name": "Switch"
+    color: "009688"
+    content_types:
+      - { "!get:model": "device" }
+  - "!create_or_update:name": "Application:Supernet"
+    color: "eb4034"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+  - "!create_or_update:name": "Branch:Supernet"
+    color: "ffc107"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+  - "!create_or_update:name": "Branch:L3Link"
+    color: "ff9800"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+      - { "!get:model": "interface" }
+  - "!create_or_update:name": "Branch:Loopback"
+    color: "ff5722"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+      - { "!get:model": "interface" }
+  - "!create_or_update:name": "Branch:LAN"
+    color: "4caf50"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+      - { "!get:model": "interface" }
+      - { "!get:model": "vlan" }
+  - "!create_or_update:name": "Tier:Web"
+    color: "f5ed16"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+      - { "!get:model": "interface" }
+      - { "!get:model": "vlan" }
+      - { "!get:model": "virtualmachine" }
+  - "!create_or_update:name": "Tier:Application"
+    color: "e8ad09"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+      - { "!get:model": "interface" }
+      - { "!get:model": "vlan" }
+      - { "!get:model": "virtualmachine" }
+  - "!create_or_update:name": "Tier:Database"
+    color: "eb4034"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+      - { "!get:model": "interface" }
+      - { "!get:model": "vlan" }
+      - { "!get:model": "virtualmachine" }
+  - "!create_or_update:name": "P2P"
+    color: "4caf50"
+    content_types:
+      - { "!get:model": "prefix" }
+      - { "!get:model": "ipaddress" }
+      - { "!get:model": "interface" }
+
+circuit_types:
+  - "!create_or_update:name": "Ethernet"
+
+prefixes:
+  - "!create_or_update:prefix": "{{ base_prefix }}"
+    type: "container"
+    status__name: "Active"
+
+secrets:
+  - "!create_or_update:name": "DEVICE_USERNAME"
+    provider: "environment-variable"
+    parameters: {"variable": "NAUTOBOT_SUPERUSER_NAME"}
+    "!ref": "device_username"
+  - "!create_or_update:name": "DEVICE_PASSWORD"
+    provider: "environment-variable"
+    parameters: {"variable": "NAUTOBOT_SUPERUSER_PASSWORD"}
+    "!ref": "device_password"
+
+secrets_groups:
+  - "!create_or_update:name": "DEVICE_CREDENTIALS"
+    "!ref": "device_credentials"
+
+secrets_group_associations:
+  - "!create_or_update:secrets_group": "!ref:device_credentials"
+    "!create_or_update:secret": "!ref:device_username"
+    "!create_or_update:access_type": "Generic"
+    "!create_or_update:secret_type": "username"
+  - "!create_or_update:secrets_group": "!ref:device_credentials"
+    "!create_or_update:secret": "!ref:device_password"
+    "!create_or_update:access_type": "Generic"
+    "!create_or_update:secret_type": "password"
+
+cluster_types:
+  - "!create_or_update:name": "Generic"
+
+storage_types:
+  - "!create_or_update:name": "Block Storage"
+    "!ref": "block_storage"
+  - "!create_or_update:name": "File Storage"
+    "!ref": "file_storage"
+  - "!create_or_update:name": "Object Storage"
+    "!ref": "object_storage"
+
+storage_protocols:
+  - "!create_or_update:name": "iSCSI"
+    storage_type__name: "Block Storage"
+  - "!create_or_update:name": "NFS"
+    storage_type__name: "File Storage"
+  - "!create_or_update:name": "CIFS"
+    storage_type__name: "File Storage"
+  - "!create_or_update:name": "FC"
+    storage_type__name: "Block Storage"
+  - "!create_or_update:name": "FCoE"
+    storage_type__name: "Block Storage"
+  - "!create_or_update:name": "S3"
+    storage_type__name: "Object Storage"
+  - "!create_or_update:name": "Swift"
+    storage_type__name: "Object Storage"
+
+storage_profiles:
+  - "!create_or_update:name": "Default Block Storage Profile"
+    capacity: 1
+    raw_capacity: 1
+    shared: true
+    capabilities:
+      - "!ref:block_storage"
+  - "!create_or_update:name": "Default File Storage Profile"
+    capacity: 1
+    raw_capacity: 1
+    shared: true
+    capabilities:
+      - "!ref:file_storage"
+  - "!create_or_update:name": "Default Object Storage Profile"
+    capacity: 1
+    raw_capacity: 1
+    shared: true
+    capabilities:
+      - "!ref:object_storage"

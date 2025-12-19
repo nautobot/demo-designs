@@ -1,0 +1,579 @@
+{% set app_vlans = application_vlans() %}
+{% set app_supernet = application_supernet() %}
+{% set app_subnet_web = app_supernet | network_offset('0.0.0.0/29')%}
+{% set app_subnet_app = app_supernet | network_offset('0.0.0.8/29')%}
+{% set app_subnet_db = app_supernet | network_offset('0.0.0.16/29')%}
+---
+tags:
+  - "!create_or_update:name": "{{ app_name }}"
+    content_types:
+      - { "!get:model": "prefix" }
+    "!ref": "tag-{{ app_name }}"
+    
+vlans:
+  - "!create_or_update:name": "{{ app_name }}-web"
+    vid: "{{ app_vlans['web'] }}"
+    status__name: "Active"
+    location: "{{ pod.id }}"
+    role__name: "Tier:Web"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-web"
+  - "!create_or_update:name": "{{ app_name }}-app"
+    vid: "{{ app_vlans['app'] }}"
+    status__name: "Active"
+    location: "{{ pod.id }}"
+    role__name: "Tier:Application"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-app"
+  - "!create_or_update:name": "{{ app_name }}-db"
+    vid: "{{ app_vlans['db'] }}"
+    status__name: "Active"
+    location: "{{ pod.id }}"
+    role__name: "Tier:Database"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-db"
+
+prefixes:
+  - "!create_or_update:prefix": "{{ app_supernet }}"
+    type: "container"
+    status__name: "Active"
+    location: "{{ pod.id }}"
+    role__name: "Application:Supernet"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:prefix": "{{ app_subnet_web }}"
+    type: "network"
+    status__name: "Active"
+    location: "{{ pod.id }}"
+    role__name: "Tier:Web"
+    tenant__name: "NTC"
+    vlan: "!ref:{{ app_name }}-web"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:prefix": "{{ app_subnet_app }}"
+    type: "network"
+    status__name: "Active"
+    location: "{{ pod.id }}"
+    role__name: "Tier:Application"
+    tenant__name: "NTC"
+    vlan: "!ref:{{ app_name }}-app"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:prefix": "{{ app_subnet_db }}"
+    type: "network"
+    status__name: "Active"
+    location: "{{ pod.id }}"
+    role__name: "Tier:Database"
+    tenant__name: "NTC"
+    vlan: "!ref:{{ app_name }}-db"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+
+ip_addresses:
+  # ------ WEB -----
+  - "!create_or_update:address": "{{ app_subnet_web | network_offset('0.0.0.1/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-web-svi-ip-hsrp"
+  - "!create_or_update:address": "{{ app_subnet_web | network_offset('0.0.0.2/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-web-svi-ip-01"
+  - "!create_or_update:address": "{{ app_subnet_web | network_offset('0.0.0.3/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-web-svi-ip-02"
+  - "!create_or_update:address": "{{ app_subnet_web | network_offset('0.0.0.4/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "vip01"
+  - "!create_or_update:address": "{{ app_subnet_web | network_offset('0.0.0.5/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "web_ip01"
+  - "!create_or_update:address": "{{ app_subnet_web | network_offset('0.0.0.6/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "web_ip02"
+  # ------ APP -----
+  - "!create_or_update:address": "{{ app_subnet_app | network_offset('0.0.0.1/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-app-svi-ip-hsrp"
+  - "!create_or_update:address": "{{ app_subnet_app | network_offset('0.0.0.2/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-app-svi-ip-01"
+  - "!create_or_update:address": "{{ app_subnet_app | network_offset('0.0.0.3/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-app-svi-ip-02"
+  - "!create_or_update:address": "{{ app_subnet_app | network_offset('0.0.0.5/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "app_ip01"
+  - "!create_or_update:address": "{{ app_subnet_app | network_offset('0.0.0.6/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "app_ip02"
+  # ------ DB -----
+  - "!create_or_update:address": "{{ app_subnet_db | network_offset('0.0.0.1/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-db-svi-ip-hsrp"
+  - "!create_or_update:address": "{{ app_subnet_db | network_offset('0.0.0.2/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-db-svi-ip-01"
+  - "!create_or_update:address": "{{ app_subnet_db | network_offset('0.0.0.3/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-db-svi-ip-02"
+  - "!create_or_update:address": "{{ app_subnet_db | network_offset('0.0.0.5/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "db_ip01"
+  - "!create_or_update:address": "{{ app_subnet_db | network_offset('0.0.0.6/29') }}"
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "db_ip02"
+
+interfaces:
+  # ------ WEB -----
+  - "!create_or_update:device__name": "{{ pod.name }}-sw1"
+    "!create_or_update:name": "SVI{{ app_vlans['web'] }}"
+    type: "virtual"
+    status__name: "Active"
+    role__name: "Tier:Web"
+    mode: "access"
+    untagged_vlan: "!ref:{{ app_name }}-web"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "SVI{{ app_vlans['web'] }}-sw1"
+  - "!create_or_update:device__name": "{{ pod.name }}-sw2"
+    "!create_or_update:name": "SVI{{ app_vlans['web'] }}"
+    type: "virtual"
+    status__name: "Active"
+    role__name: "Tier:Web"
+    mode: "access"
+    untagged_vlan: "!ref:{{ app_name }}-web"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "SVI{{ app_vlans['web'] }}-sw2"
+  # ------ APP -----
+  - "!create_or_update:device__name": "{{ pod.name }}-sw1"
+    "!create_or_update:name": "SVI{{ app_vlans['app'] }}"
+    type: "virtual"
+    status__name: "Active"
+    role__name: "Tier:Application"
+    mode: "access"
+    untagged_vlan: "!ref:{{ app_name }}-app"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "SVI{{ app_vlans['app'] }}-sw1"
+  - "!create_or_update:device__name": "{{ pod.name }}-sw2"
+    "!create_or_update:name": "SVI{{ app_vlans['app'] }}"
+    type: "virtual"
+    status__name: "Active"
+    role__name: "Tier:Application"
+    mode: "access"
+    untagged_vlan: "!ref:{{ app_name }}-app"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "SVI{{ app_vlans['app'] }}-sw2"
+  # ------ DB -----
+  - "!create_or_update:device__name": "{{ pod.name }}-sw1"
+    "!create_or_update:name": "SVI{{ app_vlans['db'] }}"
+    type: "virtual"
+    status__name: "Active"
+    role__name: "Tier:Database"
+    mode: "access"
+    untagged_vlan: "!ref:{{ app_name }}-db"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "SVI{{ app_vlans['db'] }}-sw1"
+  - "!create_or_update:device__name": "{{ pod.name }}-sw2"
+    "!create_or_update:name": "SVI{{ app_vlans['db'] }}"
+    type: "virtual"
+    status__name: "Active"
+    role__name: "Tier:Database"
+    mode: "access"
+    untagged_vlan: "!ref:{{ app_name }}-db"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "SVI{{ app_vlans['db'] }}-sw2"
+
+virtual_machines:
+  # ------ WEB -----
+  - "!create_or_update:name": "{{ app_name }}-web01"
+    status__name: "Active"
+    cluster__name: "{{ pod.name }}-cluster1"
+    tenant__name: "NTC"
+    role__name: "Tier:Web"
+    vcpus: 4
+    memory: 16000
+    disk: 80
+    interfaces:
+      - "!create_or_update:name": "eth0"
+        status__name: "Active"
+        mode: "access"
+        untagged_vlan: "!ref:{{ app_name }}-web"
+        "!ref": "{{ app_name }}-web01intf"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:name": "{{ app_name }}-web02"
+    status__name: "Active"
+    cluster__name: "{{ pod.name }}-cluster1"
+    tenant__name: "NTC"
+    role__name: "Tier:Web"
+    vcpus: 4
+    memory: 16000
+    disk: 80
+    interfaces:
+      - "!create_or_update:name": "eth0"
+        status__name: "Active"
+        mode: "access"
+        untagged_vlan: "!ref:{{ app_name }}-web"
+        "!ref": "{{ app_name }}-web02intf"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  # ------ APP -----
+  - "!create_or_update:name": "{{ app_name }}-app01"
+    status__name: "Active"
+    cluster__name: "{{ pod.name }}-cluster1"
+    tenant__name: "NTC"
+    role__name: "Tier:Application"
+    vcpus: 4
+    memory: 16000
+    disk: 80
+    interfaces:
+      - "!create_or_update:name": "eth0"
+        status__name: "Active"
+        mode: "access"
+        untagged_vlan: "!ref:{{ app_name }}-app"
+        "!ref": "{{ app_name }}-app01intf"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:name": "{{ app_name }}-app02"
+    status__name: "Active"
+    cluster__name: "{{ pod.name }}-cluster1"
+    tenant__name: "NTC"
+    role__name: "Tier:Application"
+    vcpus: 4
+    memory: 16000
+    disk: 80
+    interfaces:
+      - "!create_or_update:name": "eth0"
+        status__name: "Active"
+        mode: "access"
+        untagged_vlan: "!ref:{{ app_name }}-app"
+        "!ref": "{{ app_name }}-app02intf"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  # ------ DB -----
+  - "!create_or_update:name": "{{ app_name }}-db01"
+    status__name: "Active"
+    cluster__name: "{{ pod.name }}-cluster1"
+    tenant__name: "NTC"
+    role__name: "Tier:Database"
+    vcpus: 4
+    memory: 16000
+    disk: 80
+    interfaces:
+      - "!create_or_update:name": "eth0"
+        status__name: "Active"
+        mode: "access"
+        untagged_vlan: "!ref:{{ app_name }}-db"
+        "!ref": "{{ app_name }}-db01intf"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:name": "{{ app_name }}-db02"
+    status__name: "Active"
+    cluster__name: "{{ pod.name }}-cluster1"
+    tenant__name: "NTC"
+    role__name: "Tier:Database"
+    vcpus: 4
+    memory: 16000
+    disk: 80
+    interfaces:
+      - "!create_or_update:name": "eth0"
+        status__name: "Active"
+        mode: "access"
+        untagged_vlan: "!ref:{{ app_name }}-db"
+        "!ref": "{{ app_name }}-db02intf"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+
+storage_allocations:
+  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-fc"
+    capacity: 500
+    tenant__name: "NTC"
+    storage_protocol__name: "FC"
+    cluster:
+      - "!get:name": "{{ pod.name }}-cluster1"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-s3"
+    capacity: 500
+    tenant__name: "NTC"
+    storage_protocol__name: "S3"
+    cluster:
+      - "!get:name": "{{ pod.name }}-cluster1"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-cifs"
+    capacity: 500
+    tenant__name: "NTC"
+    storage_protocol__name: "CIFS"
+    cluster:
+      - "!get:name": "{{ pod.name }}-cluster1"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+
+ip_address_assignments:
+  # ---- SVI Interfaces ----
+  - "!create_or_update:ip_address": "!ref:{{ app_name }}-web-svi-ip-01"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['web'] }}-sw1"
+  - "!create_or_update:ip_address": "!ref:{{ app_name }}-web-svi-ip-02"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['web'] }}-sw2"
+  - "!create_or_update:ip_address": "!ref:{{ app_name }}-app-svi-ip-01"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['app'] }}-sw1"
+  - "!create_or_update:ip_address": "!ref:{{ app_name }}-app-svi-ip-02"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['app'] }}-sw2"
+  - "!create_or_update:ip_address": "!ref:{{ app_name }}-db-svi-ip-01"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['db'] }}-sw1"
+  - "!create_or_update:ip_address": "!ref:{{ app_name }}-db-svi-ip-02"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['db'] }}-sw2"
+  # ---- Virtual Machines ----
+  - "!create_or_update:ip_address": "!ref:web_ip01"
+    "!create_or_update:vm_interface": "!ref:{{ app_name }}-web01intf"
+  - "!create_or_update:ip_address": "!ref:web_ip02"
+    "!create_or_update:vm_interface": "!ref:{{ app_name }}-web02intf"
+  - "!create_or_update:ip_address": "!ref:app_ip01"
+    "!create_or_update:vm_interface": "!ref:{{ app_name }}-app01intf"
+  - "!create_or_update:ip_address": "!ref:app_ip02"
+    "!create_or_update:vm_interface": "!ref:{{ app_name }}-app02intf"
+  - "!create_or_update:ip_address": "!ref:db_ip01"
+    "!create_or_update:vm_interface": "!ref:{{ app_name }}-db01intf"
+  - "!create_or_update:ip_address": "!ref:db_ip02"
+    "!create_or_update:vm_interface": "!ref:{{ app_name }}-db02intf"
+
+interface_redundancy_groups:
+  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-web"
+    status__name: "Active"
+    virtual_ip: "!ref:{{ app_name }}-web-svi-ip-hsrp"
+    protocol: "hsrp"
+    protocol_group_id: "{{ app_vlans['web'] }}"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-web"
+  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-app"
+    status__name: "Active"
+    virtual_ip: "!ref:{{ app_name }}-app-svi-ip-hsrp"
+    protocol: "hsrp"
+    protocol_group_id: "{{ app_vlans['app'] }}"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-app"
+  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-db"
+    status__name: "Active"
+    virtual_ip: "!ref:{{ app_name }}-db-svi-ip-hsrp"
+    protocol: "hsrp"
+    protocol_group_id: "{{ app_vlans['db'] }}"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-db"
+
+interface_redundancy_group_associations:
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ app_name }}-web"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['web'] }}-sw1"
+    priority: 1
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ app_name }}-web"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['web'] }}-sw2"
+    priority: 2
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ app_name }}-app"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['app'] }}-sw1"
+    priority: 1
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ app_name }}-app"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['app'] }}-sw2"
+    priority: 2
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ app_name }}-db"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['db'] }}-sw1"
+    priority: 1
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ app_name }}-db"
+    "!create_or_update:interface": "!ref:SVI{{ app_vlans['db'] }}-sw2"
+    priority: 2
+
+load_balancer_pools:
+  - "!create_or_update:name": "{{ app_name }}-lbpool01"
+    load_balancing_algorithm: "round_robin"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-lbpool01"
+
+load_balancer_pool_members:
+  - "!create_or_update:load_balancer_pool": "!ref:{{ app_name }}-lbpool01"
+    "!create_or_update:ip_address": "!ref:web_ip01"
+    port: 443
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+  - "!create_or_update:load_balancer_pool": "!ref:{{ app_name }}-lbpool01"
+    "!create_or_update:ip_address": "!ref:web_ip02"
+    port: 443
+    status__name: "Active"
+    tenant__name: "NTC"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+
+virtual_servers:
+  - "!create_or_update:name": "{{ app_name }}-vip01"
+    load_balancer_type: "layer4"
+    port: 443
+    protocol: "https"
+    vip: "!ref:vip01"
+    load_balancer_pool: "!ref:{{ app_name }}-lbpool01"
+    tenant__name: "NTC"
+    device__name: "{{ pod.name }}-lb1"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+
+zones:
+  - "!create_or_update:name": "{{ app_name }}-web"
+    status__name: "Active"
+    interfaces:
+      - "!ref:SVI{{ app_vlans['web'] }}-sw1"
+      - "!ref:SVI{{ app_vlans['web'] }}-sw2"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-web-zone"
+  - "!create_or_update:name": "{{ app_name }}-app"
+    status__name: "Active"
+    interfaces:
+      - "!ref:SVI{{ app_vlans['app'] }}-sw1"
+      - "!ref:SVI{{ app_vlans['app'] }}-sw2"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-app-zone"
+  - "!create_or_update:name": "{{ app_name }}-db"
+    status__name: "Active"
+    interfaces:
+      - "!ref:SVI{{ app_vlans['db'] }}-sw1"
+      - "!ref:SVI{{ app_vlans['db'] }}-sw2"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-db-zone"
+
+address_object_groups:
+  - "!create_or_update:name": "{{ app_name }}-web-servers"
+    status__name: "Active"
+    address_objects:
+      - "!create_or_update:name": "{{ app_name }}-web01"
+        status__name: "Active"
+        ip_address: "!ref:web_ip01"
+      - "!create_or_update:name": "{{ app_name }}-web02"
+        status__name: "Active"
+        ip_address: "!ref:web_ip02"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-web-servers-group"
+  - "!create_or_update:name": "{{ app_name }}-app-servers"
+    status__name: "Active"
+    address_objects:
+      - "!create_or_update:name": "{{ app_name }}-app01"
+        status__name: "Active"
+        ip_address: "!ref:app_ip01"
+      - "!create_or_update:name": "{{ app_name }}-app02"
+        status__name: "Active"
+        ip_address: "!ref:app_ip02"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-app-servers-group"
+  - "!create_or_update:name": "{{ app_name }}-db-servers"
+    status__name: "Active"
+    address_objects:
+      - "!create_or_update:name": "{{ app_name }}-db01"
+        status__name: "Active"
+        ip_address: "!ref:db_ip01"
+      - "!create_or_update:name": "{{ app_name }}-db02"
+        status__name: "Active"
+        ip_address: "!ref:db_ip02"
+    tags:
+      - "!ref:tag-{{ app_name }}"
+    "!ref": "{{ app_name }}-db-servers-group"
+
+policies:
+  - "!create_or_update:name": "{{ app_name }}-policy"
+    tenant__name: "NTC"
+    status__name: "Active"
+    assigned_devices:
+      - "!get:name": "{{ pod.name }}-sw1"
+      - "!get:name": "{{ pod.name }}-sw2"
+    policy_rules:
+      - "!create_or_update:name": "{{ app_name }}-allow-web-to-app"
+        "!create_or_update:action": "allow"
+        log: true
+        source_zone: "!ref:{{ app_name }}-web-zone"
+        source_address_groups:
+          - "!ref:{{ app_name }}-web-servers-group"
+        destination_zone: "!ref:{{ app_name }}-app-zone"
+        destination_address_groups:
+          - "!ref:{{ app_name }}-app-servers-group"
+        status__name: "Active"
+        tags:
+          - "!ref:tag-{{ app_name }}"
+      - "!create_or_update:name": "{{ app_name }}-allow-app-to-db"
+        "!create_or_update:action": "allow"
+        log: true
+        source_zone: "!ref:{{ app_name }}-app-zone"
+        source_address_groups:
+          - "!ref:{{ app_name }}-app-servers-group"
+        destination_zone: "!ref:{{ app_name }}-db-zone"
+        destination_address_groups:
+          - "!ref:{{ app_name }}-db-servers-group"
+        status__name: "Active"
+        tags:
+          - "!ref:tag-{{ app_name }}"
+    tags:
+      - "!ref:tag-{{ app_name }}"
