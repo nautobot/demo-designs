@@ -1,0 +1,379 @@
+{% set container_loopback = branch_supernet | network_offset('0.0.0.0/26') %}
+{% set container_l3link = branch_supernet | network_offset('0.0.0.64/26') %}
+{% set l3link = {} %}
+{% for link in range(4) %}
+{%   set link_offset = '0.0.0.' ~ (link * 4) ~ '/30' %}
+{%   set link_network = container_l3link | network_offset(link_offset) %}
+{%   set _ = l3link.update({link: link_network}) %}
+{% endfor %}
+{% set lan_data = branch_supernet | network_offset('0.0.1.0/24') %}
+{% set lan_voice = branch_supernet | network_offset('0.0.2.0/24') %}
+
+---
+locations:
+  - "!create_or_update:name": "{{ pod_name }}"
+    status__name: "Active"
+    location_type__name: "Pod"
+    parent__name: "{{ site.name }}"
+    tenant__name: "NTC"
+    vlans:
+      - "!create_or_update:vid": 110
+        name: "Branch:Data"
+        status__name: "Active"
+        role__name: "Branch:LAN"
+        tenant__name: "NTC"
+        "!ref": "{{ pod_name }}-vlan110"
+      - "!create_or_update:vid": 120
+        name: "Branch:Voice"
+        status__name: "Active"
+        role__name: "Branch:LAN"
+        tenant__name: "NTC"
+        "!ref": "{{ pod_name }}-vlan120"
+    prefixes:
+      - "!create_or_update:prefix": "{{ branch_supernet }}"
+        type: "container"
+        role__name: "Branch:Supernet"
+        status__name: "Active"
+        tenant__name: "NTC"
+      - "!create_or_update:prefix": "{{ container_loopback }}"
+        type: "pool"
+        role__name: "Branch:Loopback"
+        status__name: "Active"
+        tenant__name: "NTC"
+      - "!create_or_update:prefix": "{{ container_l3link }}"
+        type: "container"
+        role__name: "Branch:L3Link"
+        status__name: "Active"
+        tenant__name: "NTC"
+      {% for link in range(4) %}
+      - "!create_or_update:prefix": "{{ l3link[link] }}"
+        type: "network"
+        role__name: "Branch:L3Link"
+        status__name: "Active"
+        tenant__name: "NTC"
+      {% endfor %}
+      - "!create_or_update:prefix": "{{ lan_data }}"
+        description: "Data LAN"
+        type: "network"
+        role__name: "Branch:LAN"
+        status__name: "Active"
+        tenant__name: "NTC"
+        vlan: "!ref:{{ pod_name }}-vlan110"
+      - "!create_or_update:prefix": "{{ lan_voice }}"
+        description: "Voice LAN"
+        type: "network"
+        role__name: "Branch:LAN"
+        status__name: "Active"
+        tenant__name: "NTC"
+        vlan: "!ref:{{ pod_name }}-vlan120"
+
+    racks:
+      - "!create_or_update:name": "{{ pod_name }}-rack1"
+        status__name: "Active"
+        tenant__name: "NTC"
+
+    clusters:
+      - "!create_or_update:name": "{{ pod_name }}-cluster1"
+        cluster_type__name: "Generic"
+        tenant__name: "NTC"
+        "!ref": "{{ pod_name }}-cluster1"
+
+    devices:
+    # ----- ROUTERS -----
+    {% for rtr in range(2) %}
+      - "!create_or_update:name": "{{ pod_name }}-rtr{{ rtr + 1 }}"
+        status__name: "Active"
+        device_type__model: "Dummy"
+        role__name: "Router"
+        platform__name: "Arista EOS"
+        tenant__name: "NTC"
+        rack__name: "{{ pod_name }}-rack1"
+        face: "front"
+        position: "{{ rtr + 10 }}"
+        serial: "ABC000{{ rtr + 1 }}"
+        asset_tag: "{{ pod_name }}-rtr{{ rtr + 1 }}"
+        software_version__version: "4.32.1F"
+        secrets_group__name: "DEVICE_CREDENTIALS"
+        "!ref": "{{ pod_name }}-rtr{{ rtr + 1 }}"
+        interfaces:
+        {% for port in range(2) %}
+          {% set link = 2 * rtr + port %}
+          - "!create_or_update:name": "eth{{ port + 1 }}"
+            type: "10gbase-t"
+            description: "Downlink to {{ pod_name }}-sw{{ port + 1 }}"
+            status__name: "Active"
+            role__name: "Branch:L3Link"
+            "!ref": "{{ pod_name }}-rtr{{ rtr + 1 }}:eth{{ port + 1 }}"
+        {% endfor %}
+          - "!create_or_update:name": "eth8"
+            type: "10gbase-t"
+            description: "Uplink to backbone"
+            status__name: "Active"
+            "!ref": "{{ pod_name }}-rtr{{ rtr + 1 }}:eth8"
+          - "!create_or_update:name": "Loopback0"
+            type: "virtual"
+            description: "Uplink to backbone"
+            status__name: "Active"
+            role__name: "Branch:Loopback"
+            "!ref": "{{ pod_name }}-rtr{{ rtr + 1 }}:Loopback0"
+    {% endfor %}
+    # ----- Switches -----
+    {% for sw in range(2) %}
+      - "!create_or_update:name": "{{ pod_name }}-sw{{ sw + 1 }}"
+        status__name: "Active"
+        device_type__model: "Dummy"
+        role__name: "Switch"
+        platform__name: "Arista EOS"
+        tenant__name: "NTC"
+        rack__name: "{{ pod_name }}-rack1"
+        face: "front"
+        position: "{{ sw + 40 }}"
+        serial: "ABC000{{ sw + 1 }}"
+        asset_tag: "{{ pod_name }}-sw{{ sw + 1 }}"
+        software_version__version: "4.32.1F"
+        secrets_group__name: "DEVICE_CREDENTIALS"
+        "!ref": "{{ pod_name }}-sw{{ sw + 1 }}"
+        interfaces:
+        {% for port in range(2) %}
+          - "!create_or_update:name": "eth{{ port + 1 }}"
+            type: "10gbase-t"
+            description: "Uplink to rtr{{ port + 1 }}"
+            status__name: "Active"
+            role__name: "Branch:L3Link"
+            "!ref": "{{ pod_name }}-sw{{ sw + 1 }}:eth{{ port + 1 }}"
+            "!connect_cable":
+              to: "!ref:{{ pod_name }}-rtr{{ port + 1 }}:eth{{ sw + 1 }}"
+              status__name: "Connected"
+        {% endfor %}
+        {% for port in range(10) %}
+          - "!create_or_update:name": "eth{{ port + 3 }}"
+            type: "10gbase-t"
+            status__name: "Active"
+            mode: "tagged"
+            tagged_vlans:
+              - "!ref:{{ pod_name }}-vlan110"
+              - "!ref:{{ pod_name }}-vlan120"
+            "!ref": "{{ pod_name }}-sw{{ sw + 1 }}:eth{{ port + 3 }}"
+        {% endfor %}
+          - "!create_or_update:name": "Loopback0"
+            type: "virtual"
+            description: "Uplink to backbone"
+            status__name: "Active"
+            role__name: "Branch:Loopback"
+            "!ref": "{{ pod_name }}-sw{{ sw + 1 }}:Loopback0"
+          - "!create_or_update:name": "SVI110"
+            type: "virtual"
+            description: "SVI for VLAN 110"
+            status__name: "Active"
+            role__name: "Branch:LAN"
+            mode: "access"
+            untagged_vlan: "!ref:{{ pod_name }}-vlan110"
+            "!ref": "{{ pod_name }}-sw{{ sw + 1 }}:SVI110"
+          - "!create_or_update:name": "SVI120"
+            type: "virtual"
+            description: "SVI for VLAN 120"
+            status__name: "Active"
+            role__name: "Branch:LAN"
+            mode: "access"
+            untagged_vlan: "!ref:{{ pod_name }}-vlan120"
+            "!ref": "{{ pod_name }}-sw{{ sw + 1 }}:SVI120"
+    {% endfor %}
+    # ----- Servers -----
+    {% for srv in range(8) %}
+      - "!create_or_update:name": "{{ pod_name }}-srv{{ srv + 1 }}"
+        status__name: "Active"
+        device_type__model: "HP Dummy Server"
+        role__name: "Server"
+        platform__name: "Linux"
+        tenant__name: "NTC"
+        cluster: "!ref:{{ pod_name }}-cluster1"
+        rack__name: "{{ pod_name }}-rack1"
+        face: "front"
+        position: "{{ srv + 20 }}"
+        serial: "ABC000{{ srv + 1 }}"
+        asset_tag: "{{ pod_name }}-srv{{ srv + 1 }}"
+        secrets_group__name: "DEVICE_CREDENTIALS"
+        "!ref": "{{ pod_name }}-srv{{ srv + 1 }}"
+        interfaces:
+        {% for port in range(2) %}
+          - "!create_or_update:name": "eth{{ port + 1 }}"
+            type: "10gbase-t"
+            status__name: "Active"
+            "!connect_cable":
+              to: "!ref:{{ pod_name }}-sw{{ port + 1 }}:eth{{ srv + 3 }}"
+              status__name: "Connected"
+            "!ref": "{{ pod_name }}-srv{{ srv + 1 }}:eth{{ port + 1 }}"
+        {% endfor %}
+    {% endfor %}
+    # ----- Storage -----
+    {% for stg in range(1) %}
+      - "!create_or_update:name": "{{ pod_name }}-stg{{ stg + 1 }}"
+        status__name: "Active"
+        device_type__model: "HP Storage"
+        role__name: "Storage Array"
+        platform__name: "Linux"
+        tenant__name: "NTC"
+        rack__name: "{{ pod_name }}-rack1"
+        face: "front"
+        position: "{{ stg + 1 }}"
+        serial: "ABC000{{ stg + 1 }}"
+        asset_tag: "{{ pod_name }}-stg{{ stg + 1 }}"
+        secrets_group__name: "DEVICE_CREDENTIALS"
+        "!ref": "{{ pod_name }}-stg{{ stg + 1 }}"
+        interfaces:
+        {% for port in range(2) %}
+          - "!create_or_update:name": "eth{{ port + 1 }}"
+            type: "10gbase-t"
+            status__name: "Active"
+            "!connect_cable":
+              to: "!ref:{{ pod_name }}-sw{{ port + 1 }}:eth{{ stg + 10 }}"
+              status__name: "Connected"
+        {% endfor %}
+    {% endfor %}
+    # ---- Load Balancers ----
+    {% for lb in range(1) %}
+      - "!create_or_update:name": "{{ pod_name }}-lb{{ lb + 1 }}"
+        status__name: "Active"
+        device_type__model: "F5 BIG-IP"
+        role__name: "Load Balancer"
+        platform__name: "F5 BIG-IP"
+        tenant__name: "NTC"
+        rack__name: "{{ pod_name }}-rack1"
+        face: "front"
+        position: "{{ lb + 30 }}"
+        serial: "ABC000{{ lb + 1 }}"
+        asset_tag: "{{ pod_name }}-lb{{ lb + 1 }}"
+        secrets_group__name: "DEVICE_CREDENTIALS"
+        "!ref": "{{ pod_name }}-lb{{ lb + 1 }}"
+        interfaces:
+        {% for port in range(2) %}
+          - "!create_or_update:name": "eth{{ port + 1 }}"
+            type: "10gbase-t"
+            status__name: "Active"
+            "!connect_cable":
+              to: "!ref:{{ pod_name }}-sw{{ port + 1 }}:eth{{ lb + 11 }}"
+              status__name: "Connected"
+        {% endfor %}
+    {% endfor %}
+
+ip_addresses:
+  # ----- LOOPBACKS -----
+  {% for ip in range(4) %}
+    - "!create_or_update:address": "{{ container_loopback | network_offset('0.0.0.' ~ ip ~ '/32') }}"
+      status__name: "Active"
+      tenant__name: "NTC"
+      role__name: "Loopback"
+      "!ref": "loopback-{{ ip }}"
+  {% endfor %}
+  # ----- L3LINKS -----
+  {% for link in range(4) %}
+    - "!create_or_update:address": "{{ l3link[link] | network_offset('0.0.0.1/30') }}"
+      status__name: "Active"
+      tenant__name: "NTC"
+      role__name: "Branch:L3Link"
+      "!ref": "link-{{ link }}-rtr"
+    - "!create_or_update:address": "{{ l3link[link] | network_offset('0.0.0.2/30') }}"
+      status__name: "Active"
+      tenant__name: "NTC"
+      role__name: "Branch:L3Link"
+      "!ref": "link-{{ link }}-sw"
+  {% endfor %}
+    - "!create_or_update:address": "{{ lan_data | network_offset('0.0.0.1/24') }}"
+      status__name: "Active"
+      tenant__name: "NTC"
+      "!ref": "svi_data_hsrp"
+    - "!create_or_update:address": "{{ lan_data | network_offset('0.0.0.2/24') }}"
+      status__name: "Active"
+      tenant__name: "NTC"
+      "!ref": "svi_data01"
+    - "!create_or_update:address": "{{ lan_data | network_offset('0.0.0.3/24') }}"
+      status__name: "Active"
+      tenant__name: "NTC"
+      "!ref": "svi_data02"
+  # ----- SERVERS -----
+  {% for srv in range(8) %}
+    - "!create_or_update:address": "{{ lan_data | network_offset('0.0.0.' ~ (srv + 20) ~ '/24') }}"
+      status__name: "Active"
+      tenant__name: "NTC"
+      "!ref": "lan_data2{{ srv + 1 }}"
+  {% endfor %}
+
+interface_redundancy_groups:
+  - "!create_or_update:name": "{{ pod_name }}-data"
+    status__name: "Active"
+    virtual_ip: "!ref:svi_data_hsrp"
+    protocol: "hsrp"
+    protocol_group_id: 110
+    "!ref": "HSRP-Data"
+
+interface_redundancy_group_associations:
+  - "!create_or_update:interface_redundancy_group": "!ref:HSRP-Data"
+    "!create_or_update:interface": "!ref:{{ pod_name }}-sw1:SVI110"
+    priority: 1
+  - "!create_or_update:interface_redundancy_group": "!ref:HSRP-Data"
+    "!create_or_update:interface": "!ref:{{ pod_name }}-sw2:SVI110"
+    priority: 2
+
+circuits:
+  {% for i in range(2) %}
+  - "!create_or_update:cid": "{{ pod_name }}-CKT-{{ i + 1 }}"
+    status__name: "Active"
+    provider__name: "NTC"
+    circuit_type__name: "Ethernet"
+    tenant__name: "NTC"
+    circuit_terminations:
+      - "!create_or_update:term_side": "A"
+        location__name: "{{ pod_name }}"
+        "!connect_cable":
+          to: "!ref:{{ pod_name }}-rtr{{ i + 1 }}:eth8"
+          status__name: "Connected"
+      - "!create_or_update:term_side": "Z"
+        provider_network__name: "NTC-WAN"
+  {% endfor %}
+
+dynamic_groups:
+  - "!create_or_update:name": "{{ pod_name }}"
+    "description": "Dynamic Group for the devices in location {{ pod_name }}"
+    tenant__name: "NTC"
+    content_type:
+      "!get:model": "device"
+      "!get:app_label": "dcim"
+    filter: {"location": ["{{ pod_name }}"], "platform": ["Arista EOS"]} 
+
+# Add tenants to demo storage allocations
+tenants:
+  {% for tenant in range(4) %}
+  - "!create_or_update:name": "{{ pod_name }}-tenant{{ tenant + 1 }}"
+    "!ref": "{{ pod_name }}-tenant{{ tenant + 1 }}"
+  {% endfor %}
+
+
+ip_address_assignments:
+# ----- LOOPBACKS -----
+  {% for ip in range(2) %}
+    - "!create_or_update:ip_address": "!ref:loopback-{{ ip }}"
+      "!create_or_update:interface": "!ref:{{ pod_name }}-rtr{{ ip + 1 }}:Loopback0"
+  {% endfor %}
+  {% for ip in range(2) %}
+    - "!create_or_update:ip_address": "!ref:loopback-{{ 2 + ip }}"
+      "!create_or_update:interface": "!ref:{{ pod_name }}-sw{{ ip + 1 }}:Loopback0"
+  {% endfor %}
+  # ----- L3LINKS -----
+  {% for rtr in range(2) %}
+  {%   for sw in range(2) %}
+  {%     set link = 2 * rtr + sw %}
+    - "!create_or_update:ip_address": "!ref:link-{{ link }}-rtr"
+      "!create_or_update:interface": "!ref:{{ pod_name }}-rtr{{ rtr + 1 }}:eth{{ sw + 1 }}"
+    - "!create_or_update:ip_address": "!ref:link-{{ link }}-sw"
+      "!create_or_update:interface": "!ref:{{ pod_name }}-sw{{ sw + 1 }}:eth{{ rtr + 1 }}"
+  {%   endfor %}
+  {% endfor %}
+    - "!create_or_update:ip_address": "!ref:svi_data01"
+      "!create_or_update:interface": "!ref:{{ pod_name }}-sw1:SVI110"
+    - "!create_or_update:ip_address": "!ref:svi_data02"
+      "!create_or_update:interface": "!ref:{{ pod_name }}-sw2:SVI110"
+  # ----- SERVERS -----
+  {% for srv in range(8) %}
+    - "!create_or_update:ip_address": "!ref:lan_data2{{ srv + 1 }}"
+      "!create_or_update:interface": "!ref:{{ pod_name }}-srv{{ srv + 1 }}:eth1"
+  {% endfor %}
