@@ -343,32 +343,6 @@ virtual_machines:
     tags:
       - "!ref:tag-{{ app_name }}"
 
-storage_allocations:
-  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-fc"
-    capacity: 500
-    tenant__name: "NTC"
-    storage_protocol__name: "FC"
-    cluster:
-      - "!get:name": "{{ pod.name }}-cluster1"
-    tags:
-      - "!ref:tag-{{ app_name }}"
-  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-s3"
-    capacity: 500
-    tenant__name: "NTC"
-    storage_protocol__name: "S3"
-    cluster:
-      - "!get:name": "{{ pod.name }}-cluster1"
-    tags:
-      - "!ref:tag-{{ app_name }}"
-  - "!create_or_update:name": "{{ pod.name }}-{{ app_name }}-cifs"
-    capacity: 500
-    tenant__name: "NTC"
-    storage_protocol__name: "CIFS"
-    cluster:
-      - "!get:name": "{{ pod.name }}-cluster1"
-    tags:
-      - "!ref:tag-{{ app_name }}"
-
 ip_address_assignments:
   # ---- SVI Interfaces ----
   - "!create_or_update:ip_address": "!ref:{{ app_name }}-web-svi-ip-01"
