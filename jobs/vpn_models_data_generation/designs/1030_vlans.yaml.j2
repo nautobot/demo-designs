@@ -1,0 +1,18 @@
+vlans:
+{% for region in ["AMER", "EMEA", "APAC"] %}
+  {% for branch in BRANCHES[region] %}
+    - "!create_or_update:vid": 3001
+      "!create_or_update:name": "{{ region }}-{{ branch }}-VLAN3001"
+      locations: ["!ref:{{ region }}-{{ branch }}"]
+      description: "VLAN 3001 - Management"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ branch }}-VLAN3001"
+    - "!create_or_update:vid": 3002
+      "!create_or_update:name": "{{ region }}-{{ branch }}-VLAN3002"
+      locations: ["!ref:{{ region }}-{{ branch }}"]
+      description: "VLAN 3002 - Data"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ branch }}-VLAN3002"
+  {% endfor %}
+{% endfor %}
+

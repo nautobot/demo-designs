@@ -1,0 +1,71 @@
+devices:
+{% for region in ["AMER", "EMEA", "APAC"] %}
+  {% for branch in BRANCHES[region] %}
+    {# --- ROUTERS --- #}
+    {% for device in range(2) %}
+    - "!create_or_update:name": "{{ region }}-{{ branch }}-RTR0{{ device + 1 }}"
+      device_type__model: "ISR4451-X"
+      location__name: "{{ region }}-{{ branch }}"
+      status__name: "Active"
+      role__name: "Router"
+      serial: "FTX1234{{ device + 1 }}5678"
+      "!ref": "{{ region }}-{{ branch }}-RTR0{{ device + 1 }}"
+      interfaces:
+      {# --- DOWNLINKS --- #}
+      {% for interface in range(2)%}
+        - "!create_or_update:name": "Gi0/{{ interface + 1 }}"
+          type: "10gbase-t"
+          status__name: "Active"
+          "!ref": "{{ region }}-{{ branch }}-RTR0{{ device + 1 }}-to-SW0{{ interface + 1 }}"
+      {% endfor %}
+      {# --- WAN --- #}
+        - "!create_or_update:name": "Gi1/1"
+          type: "10gbase-t"
+          status__name: "Active"
+          "!ref": "{{ region }}-{{ branch }}-RTR0{{ device + 1 }}-WAN"
+      {# --- Tunnel --- #}
+        - "!create_or_update:name": "Tunnel0"
+          type: "tunnel"
+          status__name: "Active"
+          "!ref": "{{ region }}-{{ branch }}-RTR0{{ device + 1 }}-Tunnel0"
+    {% endfor %}
+    {# --- SWITCHES --- #}
+    {% for device in range(2) %}
+    - "!create_or_update:name": "{{ region }}-{{ branch }}-SW0{{ device + 1 }}"
+      device_type__model: "C9300"
+      location__name: "{{ region }}-{{ branch }}"
+      status__name: "Active"
+      role__name: "Switch"
+      serial: "CAT1234{{ device + 1 }}5678"
+      interfaces:
+      {# --- UPLINKS --- #}
+      {% for interface in range(2)%}
+        - "!create_or_update:name": "Gi2/1/{{ interface + 1 }}"
+          type: "10gbase-t"
+          status__name: "Active"
+          "!connect_cable":
+            to: "!ref:{{ region }}-{{ branch }}-RTR0{{ interface + 1 }}-to-SW0{{ device + 1 }}"
+            status__name: "Connected"
+          "!ref": "{{ region }}-{{ branch }}-SW0{{ device + 1 }}-to-RTR0{{ interface + 1 }}"
+      {% endfor %}
+      {# --- SWITCHPORTS --- #}
+      {% for interface in range(24)%}
+        - "!create_or_update:name": "Gi1/0/{{ interface + 1 }}"
+          type: "10gbase-t"
+          status__name: "Active"
+          mode: "tagged"
+          tagged_vlans: ["!ref:{{ region }}-{{ branch }}-VLAN3001", "!ref:{{ region }}-{{ branch }}-VLAN3002"]
+      {% endfor %}
+      {# --- SVIs --- #}
+      {% for vlan in [3001, 3002]%}
+        - "!create_or_update:name": "SVI{{ vlan }}"
+          type: "virtual"
+          status__name: "Active"
+          mode: "access"
+          untagged_vlan: "!ref:{{ region }}-{{ branch }}-VLAN{{ vlan }}"
+          "!ref": "{{ region }}-{{ branch }}-SW0{{ device + 1 }}-SVI{{ vlan }}"
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+{% endfor %}
+

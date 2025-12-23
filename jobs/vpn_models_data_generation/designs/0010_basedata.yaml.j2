@@ -1,0 +1,52 @@
+roles:
+  - "!create_or_update:name": "Router"
+    color: "607d8b"
+    content_types:
+      - { "!get:model": "device" }
+  - "!create_or_update:name": "Switch"
+    color: "009688"
+    content_types:
+      - { "!get:model": "device" }
+  - "!create_or_update:name": "DMVPN"
+    color: "673ab7"
+    content_types:
+      - { "!get:model": "vpn" }
+      - { "!get:model": "vpntunnel" }
+      - { "!get:model": "vpntunnelendpoint" }
+
+location_types:
+  - "!create_or_update:name": "Region"
+    content_types:
+        - { "!get:model": "prefix" }
+    children:
+      - "!create_or_update:name": "Data Center"
+        content_types:
+          - { "!get:model": "device" }
+          - { "!get:model": "rack" }
+          - { "!get:model": "prefix" }
+          - { "!get:model": "vlan" }
+          - { "!get:model": "vlangroup" }
+          - { "!get:model": "circuittermination" }
+          - { "!get:model": "cluster" }
+
+manufacturers:
+  - "!create_or_update:name": "Cisco"
+    description: "Cisco Systems"
+    device_types:
+      - "!create_or_update:model": "ISR4451-X"
+        part_number: "ISR4451-X"
+        u_height: 4
+        is_full_depth: true
+      - "!create_or_update:model": "C9300"
+        part_number: "C9300"
+        u_height: 1
+        is_full_depth: true
+
+providers:
+  - "!create_or_update:name": "NTC"
+    provider_networks:
+      - "!create_or_update:name": "NTC-WAN"
+
+circuit_types:
+  - "!create_or_update:name": "Ethernet"
+

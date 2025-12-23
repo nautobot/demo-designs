@@ -1,0 +1,32 @@
+interface_redundancy_groups:
+{% for region in ["AMER", "EMEA", "APAC"]%}
+  - "!create_or_update:name": "{{ region }}-DC01-HSRP-3001"
+    status__name: "Active"
+    virtual_ip: "!ref:{{ region }}-HSRP-SVI3001-IP"
+    protocol: "hsrp"
+    protocol_group_id: 3001
+    "!ref": "{{ region }}-HSRP-SVI3001-IRG"
+  - "!create_or_update:name": "{{ region }}-DC01-HSRP-3002"
+    status__name: "Active"
+    virtual_ip: "!ref:{{ region }}-HSRP-SVI3002-IP"
+    protocol: "hsrp"
+    protocol_group_id: 3002
+    "!ref": "{{ region }}-HSRP-SVI3002-IRG"
+{% endfor %}
+
+interface_redundancy_group_associations:
+{% for region in ["AMER", "EMEA", "APAC"]%}
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ region }}-HSRP-SVI3001-IRG"
+    "!create_or_update:interface": "!ref:{{ region }}-SW01-SVI3001"
+    priority: 1
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ region }}-HSRP-SVI3001-IRG"
+    "!create_or_update:interface": "!ref:{{ region }}-SW02-SVI3001"
+    priority: 2
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ region }}-HSRP-SVI3002-IRG"
+    "!create_or_update:interface": "!ref:{{ region }}-SW01-SVI3002"
+    priority: 1
+  - "!create_or_update:interface_redundancy_group": "!ref:{{ region }}-HSRP-SVI3002-IRG"
+    "!create_or_update:interface": "!ref:{{ region }}-SW02-SVI3002"
+    priority: 2
+{% endfor %}
+
