@@ -1,0 +1,97 @@
+vpns:
+{% for region, data in REGIONS.items() %}
+  - "!create_or_update:name": "{{ region }}-DMVPN"
+    vpn_id: "{{ region }}"
+    vpn_profile__name: "High-Security Site-to-Site"
+    role__name: "DMVPN"
+    "!ref": "{{ region }}-DMVPN"
+{% endfor %}
+  - "!create_or_update:name": "Azure-VPN"
+    vpn_id: "AZURE"
+    vpn_profile__name: "High-Security Site-to-Site"
+    "!ref": "Azure-VPN"
+
+vpn_tunnel_endpoints:
+{% for region, data in REGIONS.items() %}
+  {% for site in data.SITES %}
+    {% if site.role == 'Hub' %}
+    - "!create_or_update:device": "!ref:{{ region }}-{{ site.name }}-RTR01"
+      "!create_or_update:source_interface": "!ref:{{ region }}-{{ site.name }}-RTR01-WAN"
+      "!create_or_update:source_ipaddress": "!ref:{{ region }}-{{ site.name }}-RTR01-WAN-IP"
+      tunnel_interface: "!ref:{{ region }}-{{ site.name }}-RTR01-Tunnel0"
+      role__name: "Hub"
+      protected_prefixes: ["!ref:{{ region }}-{{ site.name }}-LAN-SUPERNET"]
+      "!ref": "{{ region }}-{{ site.name }}-DMVPN-HUB01"
+    - "!create_or_update:device": "!ref:{{ region }}-{{ site.name }}-RTR02"
+      "!create_or_update:source_interface": "!ref:{{ region }}-{{ site.name }}-RTR02-WAN"
+      "!create_or_update:source_ipaddress": "!ref:{{ region }}-{{ site.name }}-RTR02-WAN-IP"
+      tunnel_interface: "!ref:{{ region }}-{{ site.name }}-RTR02-Tunnel0"
+      role__name: "Hub"
+      protected_prefixes: ["!ref:{{ region }}-{{ site.name }}-LAN-SUPERNET"]
+      "!ref": "{{ region }}-{{ site.name }}-DMVPN-HUB02"
+    {% elif site.role == 'Spoke' %}
+    - "!create_or_update:device": "!ref:{{ region }}-{{ site.name }}-RTR01"
+      "!create_or_update:source_interface": "!ref:{{ region }}-{{ site.name }}-RTR01-WAN"
+      "!create_or_update:source_ipaddress": "!ref:{{ region }}-{{ site.name }}-RTR01-WAN-IP"
+      tunnel_interface: "!ref:{{ region }}-{{ site.name }}-RTR01-Tunnel0"
+      role__name: "Spoke"
+      protected_prefixes: ["!ref:{{ region }}-{{ site.name }}-LAN-SUPERNET"]
+      "!ref": "{{ region }}-{{ site.name }}-DMVPN-SPOKE01"
+    - "!create_or_update:device": "!ref:{{ region }}-{{ site.name }}-RTR02"
+      "!create_or_update:source_interface": "!ref:{{ region }}-{{ site.name }}-RTR02-WAN"
+      "!create_or_update:source_ipaddress": "!ref:{{ region }}-{{ site.name }}-RTR02-WAN-IP"
+      tunnel_interface: "!ref:{{ region }}-{{ site.name }}-RTR02-Tunnel0"
+      role__name: "Spoke"
+      protected_prefixes: ["!ref:{{ region }}-{{ site.name }}-LAN-SUPERNET"]
+      "!ref": "{{ region }}-{{ site.name }}-DMVPN-SPOKE02"
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+    - "!create_or_update:source_fqdn": "vpn.azure.com"
+      role__name: "Peer"
+      protected_prefixes: ["!ref:Azure-LAN-SUPERNET"]
+      "!ref": "Azure-VPNEndpoint"
+
+vpn_tunnels:
+{% for region, data in REGIONS.items() %}
+  {% for site in data.SITES %}
+    {% if site.role == 'Spoke' %}
+    - "!create_or_update:name": "{{ region }}{{ site.name }}01"
+      description: "Tunnel from {{ region }}-DC01-RTR01 to {{ region }}-{{ site.name }}-RTR01"
+      vpn: "!ref:{{ region }}-DMVPN"
+      tunnel_id: "{{ region }}{{ site.name }}01"
+      encapsulation: "IPsec-Tunnel"
+      endpoint_a: "!ref:{{ region }}-DC01-DMVPN-HUB01"
+      endpoint_z: "!ref:{{ region }}-{{ site.name }}-DMVPN-SPOKE01"
+      status__name: "Active"
+      role__name: "DMVPN"
+    - "!create_or_update:name": "{{ region }}{{ site.name }}02"
+      description: "Tunnel from {{ region }}-DC01-RTR02 to {{ region }}-{{ site.name }}-RTR02"
+      vpn: "!ref:{{ region }}-DMVPN"
+      tunnel_id: "{{ region }}{{ site.name }}02"
+      encapsulation: "IPsec-Tunnel"
+      endpoint_a: "!ref:{{ region }}-DC01-DMVPN-HUB02"
+      endpoint_z: "!ref:{{ region }}-{{ site.name }}-DMVPN-SPOKE02"
+      status__name: "Active"
+      role__name: "DMVPN"
+    {% elif site.role == 'Hub' %}
+    - "!create_or_update:name": "{{ region }}AZ01"
+      description: "Tunnel from {{ region }}-{{ site.name }}-RTR01 to Azure"
+      vpn: "!ref:Azure-VPN"
+      tunnel_id: "{{ region }}AZ01"
+      encapsulation: "IPsec-Tunnel"
+      endpoint_a: "!ref:{{ region }}-{{ site.name }}-DMVPN-HUB01"
+      endpoint_z: "!ref:Azure-VPNEndpoint"
+      status__name: "Active"
+    - "!create_or_update:name": "{{ region }}AZ02"
+      description: "Tunnel from {{ region }}-{{ site.name }}-RTR02 to Azure"
+      vpn: "!ref:Azure-VPN"
+      tunnel_id: "{{ region }}AZ02"
+      encapsulation: "IPsec-Tunnel"
+      endpoint_a: "!ref:{{ region }}-{{ site.name }}-DMVPN-HUB02"
+      endpoint_z: "!ref:Azure-VPNEndpoint"
+      status__name: "Active"
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+

@@ -1,0 +1,79 @@
+prefixes:
+    - "!create_or_update:prefix": "172.16.0.0/12"
+      locations: ["!ref:Azure"]
+      description: "Azure"
+      status__name: "Active"
+      type: "network"
+      "!ref": "Azure-LAN-SUPERNET"
+{% for region, data in REGIONS.items() %}
+    - "!create_or_update:prefix": "{{ data.VPN_POOL }}"
+      locations: ["!ref:{{ region }}"]
+      description: "{{ region }} - VPN Pool"
+      status__name: "Active"
+      type: "network"
+  {% for site in data.SITES %}
+    {% set l3links_offset = site.l3links_offset | default('0.0.6.0/24' if site.type == 'branch' else '0.0.30.0/24') %}
+    - "!create_or_update:prefix": "{{ site.wan }}"
+      locations: ["!ref:{{ region }}-{{ site.name }}"]
+      description: "{{ region }}-{{ site.name }} - WAN"
+      status__name: "Active"
+      type: "container"
+      children:
+        - "!create_or_update:prefix": "{{ site.wan | network_offset('0.0.0.0/30') }}"
+          locations: ["!ref:{{ region }}-{{ site.name }}"]
+          description: "{{ region }} {{ site.name }} - Primary WAN Circuit"
+          status__name: "Active"
+          type: "network"
+        - "!create_or_update:prefix": "{{ site.wan | network_offset('0.0.0.4/30') }}"
+          locations: ["!ref:{{ region }}-{{ site.name }}"]
+          description: "{{ region }} {{ site.name }} - Secondary WAN Circuit"
+          status__name: "Active"
+          type: "network"
+    - "!create_or_update:prefix": "{{ site.lan }}"
+      locations: ["!ref:{{ region }}-{{ site.name }}"]
+      description: "{{ region }}-{{ site.name }} - LAN"
+      status__name: "Active"
+      type: "container"
+      "!ref": "{{ region }}-{{ site.name }}-LAN-SUPERNET"
+      children:
+        - "!create_or_update:prefix": "{{ site.lan | network_offset(l3links_offset) }}"
+          locations: ["!ref:{{ region }}-{{ site.name }}"]
+          description: "{{ region }} {{ site.name }} - L3 Links"
+          status__name: "Active"
+          type: "container"
+          children:
+            - "!create_or_update:prefix": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.0/30') }}"
+              locations: ["!ref:{{ region }}-{{ site.name }}"]
+              description: "{{ region }}-{{ site.name }}-RTR01 to {{ region }}-{{ site.name }}-SW01"
+              status__name: "Active"
+              type: "network"
+            - "!create_or_update:prefix": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.4/30') }}"
+              locations: ["!ref:{{ region }}-{{ site.name }}"]
+              description: "{{ region }}-{{ site.name }}-RTR01 to {{ region }}-{{ site.name }}-SW02"
+              status__name: "Active"
+              type: "network"
+            - "!create_or_update:prefix": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.8/30') }}"
+              locations: ["!ref:{{ region }}-{{ site.name }}"]
+              description: "{{ region }}-{{ site.name }}-RTR02 to {{ region }}-{{ site.name }}-SW01"
+              status__name: "Active"
+              type: "network"
+            - "!create_or_update:prefix": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.12/30') }}"
+              locations: ["!ref:{{ region }}-{{ site.name }}"]
+              description: "{{ region }}-{{ site.name }}-RTR02 to {{ region }}-{{ site.name }}-SW02"
+              status__name: "Active"
+              type: "network"
+        - "!create_or_update:prefix": "{{ site.lan | network_offset('0.0.1.0/24') }}"
+          locations: ["!ref:{{ region }}-{{ site.name }}"]
+          description: "{{ region }} {{ site.name }} - Management"
+          status__name: "Active"
+          type: "container"
+          vlan: "!ref:{{ region }}-{{ site.name }}-VLAN3001"
+        - "!create_or_update:prefix": "{{ site.lan | network_offset('0.0.2.0/24') }}"
+          locations: ["!ref:{{ region }}-{{ site.name }}"]
+          description: "{{ region }} {{ site.name }} - Data"
+          status__name: "Active"
+          type: "container"
+          vlan: "!ref:{{ region }}-{{ site.name }}-VLAN3002"
+  {% endfor %}
+{% endfor %}
+

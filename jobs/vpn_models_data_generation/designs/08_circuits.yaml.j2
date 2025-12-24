@@ -1,27 +1,27 @@
 circuits:
-{% for region in ["AMER", "EMEA", "APAC"] %}
-  {% for branch in BRANCHES[region] %}
-    - "!create_or_update:cid": "{{ region }}-{{ branch }}-WAN01"
+{% for region, data in REGIONS.items() %}
+  {% for site in data.SITES %}
+    - "!create_or_update:cid": "{{ region }}-{{ site.name }}-WAN01"
       status__name: "Active"
       provider__name: "NTC"
       circuit_type__name: "Ethernet"
       circuit_terminations:
         - "!create_or_update:term_side": "A"
-          location__name: "{{ region }}-{{ branch }}"
+          location__name: "{{ region }}-{{ site.name }}"
           "!connect_cable":
-            to: "!ref:{{ region }}-{{ branch }}-RTR01-WAN"
+            to: "!ref:{{ region }}-{{ site.name }}-RTR01-WAN"
             status__name: "Connected"
         - "!create_or_update:term_side": "Z"
           provider_network__name: "NTC-WAN"
-    - "!create_or_update:cid": "{{ region }}-{{ branch }}-WAN02"
+    - "!create_or_update:cid": "{{ region }}-{{ site.name }}-WAN02"
       status__name: "Active"
       provider__name: "NTC"
       circuit_type__name: "Ethernet"
       circuit_terminations:
         - "!create_or_update:term_side": "A"
-          location__name: "{{ region }}-{{ branch }}"
+          location__name: "{{ region }}-{{ site.name }}"
           "!connect_cable":
-            to: "!ref:{{ region }}-{{ branch }}-RTR02-WAN"
+            to: "!ref:{{ region }}-{{ site.name }}-RTR02-WAN"
             status__name: "Connected"
         - "!create_or_update:term_side": "Z"
           provider_network__name: "NTC-WAN"

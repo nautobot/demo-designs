@@ -7,6 +7,11 @@ roles:
     color: "009688"
     content_types:
       - { "!get:model": "device" }
+  - "!create_or_update:name": "DMVPN"
+    color: "ff5722"
+    content_types:
+      - { "!get:model": "vpn" }
+      - { "!get:model": "vpntunnel" }
 
 location_types:
   - "!create_or_update:name": "Region"
@@ -14,6 +19,15 @@ location_types:
       - { "!get:model": "prefix" }
     children:
       - "!create_or_update:name": "Branch"
+        content_types:
+          - { "!get:model": "device" }
+          - { "!get:model": "rack" }
+          - { "!get:model": "prefix" }
+          - { "!get:model": "vlan" }
+          - { "!get:model": "vlangroup" }
+          - { "!get:model": "circuittermination" }
+          - { "!get:model": "cluster" }
+      - "!create_or_update:name": "Data Center"
         content_types:
           - { "!get:model": "device" }
           - { "!get:model": "rack" }

@@ -1,0 +1,128 @@
+ip_addresses:
+{% for region, data in REGIONS.items() %}
+  {% for site in data.SITES %}
+    {% set l3links_offset = site.l3links_offset | default('0.0.6.0/24' if site.type == 'branch' else '0.0.30.0/24') %}
+    {# --- VPN --- #}
+    {% set vpn_offset = site.vpn_offset | default('0.0.0.1/24' if site.type == 'data_center' else None) %}
+    {% if vpn_offset %}
+    - "!create_or_update:address": "{{ data.VPN_POOL | network_offset(vpn_offset) }}"
+      description: "{{ region }}-{{ site.name }}-RTR01-Tunnel0"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-RTR01-Tunnel0-IP"
+    - "!create_or_update:address": "{{ data.VPN_POOL | network_offset(vpn_offset) }}"
+      description: "{{ region }}-{{ site.name }}-RTR02-Tunnel0"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-RTR02-Tunnel0-IP"
+    {% endif %}
+    {# --- WAN --- #}
+    - "!create_or_update:address": "{{ site.wan | network_offset('0.0.0.1/30') }}"
+      description: "{{ region }}-{{ site.name }}-RTR01-WAN"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-RTR01-WAN-IP"
+    - "!create_or_update:address": "{{ site.wan | network_offset('0.0.0.5/30') }}"
+      description: "{{ region }}-{{ site.name }}-RTR02-WAN"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-RTR02-WAN-IP"
+    {# --- LAN --- #}
+    - "!create_or_update:address": "{{ site.lan | network_offset('0.0.1.1/24') }}"
+      description: "{{ region }}-{{ site.name }}-HSRP-SVI3001"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-HSRP-SVI3001-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset('0.0.1.2/24') }}"
+      description: "{{ region }}-{{ site.name }}-SW01-SVI3001"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-SW01-SVI3001-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset('0.0.1.3/24') }}"
+      description: "{{ region }}-{{ site.name }}-SW02-SVI3001"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-SW02-SVI3001-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset('0.0.2.1/24') }}"
+      description: "{{ region }}-{{ site.name }}-HSRP-SVI3002"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-HSRP-SVI3002-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset('0.0.2.2/24') }}"
+      description: "{{ region }}-{{ site.name }}-SW01-SVI3002"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-SW01-SVI3002-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset('0.0.2.3/24') }}"
+      description: "{{ region }}-{{ site.name }}-SW02-SVI3002"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-SW02-SVI3002-IP"
+      {# --- L3 Links --- #}
+    - "!create_or_update:address": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.1/30') }}"
+      description: "{{ region }}-{{ site.name }}-RTR01 to {{ region }}-{{ site.name }}-SW01"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-RTR01-to-SW01-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.2/30') }}"
+      description: "{{ region }}-{{ site.name }}-SW01 to {{ region }}-{{ site.name }}-RTR01"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-SW01-to-RTR01-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.5/30') }}"
+      description: "{{ region }}-{{ site.name }}-RTR02 to {{ region }}-{{ site.name }}-SW01"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-RTR02-to-SW01-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.6/30') }}"
+      description: "{{ region }}-{{ site.name }}-SW01 to {{ region }}-{{ site.name }}-RTR02"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-SW01-to-RTR02-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.9/30') }}"
+      description: "{{ region }}-{{ site.name }}-RTR01 to {{ region }}-{{ site.name }}-SW02"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-RTR01-to-SW02-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.10/30') }}"
+      description: "{{ region }}-{{ site.name }}-SW02 to {{ region }}-{{ site.name }}-RTR01"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-SW02-to-RTR01-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.13/30') }}"
+      description: "{{ region }}-{{ site.name }}-RTR02 to {{ region }}-{{ site.name }}-SW02"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-RTR02-to-SW02-IP"
+    - "!create_or_update:address": "{{ site.lan | network_offset(l3links_offset) | network_offset('0.0.0.14/30') }}"
+      description: "{{ region }}-{{ site.name }}-SW02 to {{ region }}-{{ site.name }}-RTR02"
+      status__name: "Active"
+      "!ref": "{{ region }}-{{ site.name }}-SW02-to-RTR02-IP"
+  {% endfor %}
+{% endfor %}
+
+ip_address_assignments:
+{% for region, data in REGIONS.items()%}
+  {% for site in data.SITES %}
+    {# --- SVIs --- #}
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-SW01-SVI3001-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-SW01-SVI3001"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-SW01-SVI3002-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-SW01-SVI3002"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-SW02-SVI3001-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-SW02-SVI3001"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-SW02-SVI3002-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-SW02-SVI3002"
+    {# --- L3 Links --- #}
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-RTR01-to-SW01-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-RTR01-to-SW01"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-SW01-to-RTR01-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-SW01-to-RTR01"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-RTR02-to-SW01-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-RTR02-to-SW01"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-SW01-to-RTR02-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-SW01-to-RTR02"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-RTR01-to-SW02-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-RTR01-to-SW02"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-SW02-to-RTR01-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-SW02-to-RTR01"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-RTR02-to-SW02-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-RTR02-to-SW02"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-SW02-to-RTR02-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-SW02-to-RTR02"
+    {# --- WAN --- #}
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-RTR01-WAN-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-RTR01-WAN"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-RTR02-WAN-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-RTR02-WAN"
+    {# --- VPN --- #}
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-RTR01-Tunnel0-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-RTR01-Tunnel0"
+    - "!create_or_update:ip_address": "!ref:{{ region }}-{{ site.name }}-RTR02-Tunnel0-IP"
+      "!create_or_update:interface": "!ref:{{ region }}-{{ site.name }}-RTR02-Tunnel0"
+  {% endfor %}
+{% endfor %}
+

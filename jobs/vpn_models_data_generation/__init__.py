@@ -19,10 +19,7 @@ class VPNModelsDataGeneration(DesignJob):
         has_sensitive_variables = False
         extensions = [ext.CableConnectionExtension]
         design_mode = DesignModeChoices.DEPLOYMENT
-        design_files = [
-            "designs/0000_vpn_datagen_dc.yaml.j2",
-            "designs/1000_vpn_datagen_branches.yaml.j2",
-        ]
+        design_file = "designs/vpn_datagen.yaml.j2"
         context_class = VPNModelsDataGenerationContext
 
 

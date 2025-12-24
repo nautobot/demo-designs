@@ -1,0 +1,20 @@
+locations:
+  - "!create_or_update:name": "Azure"
+    location_type__name: "Region"
+    status__name: "Active"
+    "!ref": "Azure"
+{% for region, data in REGIONS.items() %}
+  - "!create_or_update:name": "{{ region }}"
+    location_type__name: "Region"
+    status__name: "Active"
+    "!ref": "{{ region }}"
+    children:
+  {% for site in data.SITES %}
+      - "!create_or_update:name": "{{ region }}-{{ site.name }}"
+        location_type__name: "{{ 'Data Center' if site.type == 'data_center' else 'Branch' }}"
+        description: "{{ site.description }}"
+        status__name: "Active"
+        "!ref": "{{ region }}-{{ site.name }}"
+  {% endfor %}
+{% endfor %}
+
