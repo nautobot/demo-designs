@@ -28,7 +28,7 @@ class EdgeDesign(DesignJob):
         design_file = "designs/0001_design.yaml.j2"
         context_class = EdgeDesignContext
         nautobot_version = ">=2"
-        design_mode = "Deployment"
+        design_mode = "deployment"
 
 
 name = "Demo Designs"
