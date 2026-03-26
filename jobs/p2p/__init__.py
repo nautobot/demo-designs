@@ -73,6 +73,7 @@ class P2PDesign(DesignJob):
             "designs/0002_devices.yaml.j2",
         ]
         context_class = P2PContext
+        design_mode = "deployment"
         extensions = [
             ext.CableConnectionExtension,
             ext.NextPrefixExtension,

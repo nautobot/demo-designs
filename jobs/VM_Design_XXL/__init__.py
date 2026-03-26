@@ -63,6 +63,7 @@ class VMXXLDesign(DesignJob):
         design_file = "designs/0001_design.yaml.j2"
         context_class = NonNetworkDesignContext
         nautobot_version = ">=2"
+        design_mode = "deployment"
 
 
 name = "Demo Designs"
